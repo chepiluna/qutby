@@ -1,0 +1,187 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* ===== Finance palette (dari gambar) ===== */
+:root {
+  --fin-orange-1: #e47717;
+  --fin-orange-2: #ca4b14;
+  --fin-red-1: #D92200;
+  --fin-maroon: #920004;
+  --fin-maroon-dark: #5A0006;
+}
+
+/* Konten utama tetap putih */
+.fi-main {
+  background: #ffffff !important;
+}
+
+/* Sidebar gradient (finance) */
+.fi-sidebar {
+  background: linear-gradient(
+    180deg,
+    var(--fin-maroon-dark),
+    var(--fin-maroon),
+    var(--fin-red-1),
+    var(--fin-orange-2)
+  ) !important;
+}
+
+.fi-sidebar,
+.fi-sidebar * {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* ACTIVE NAV: jangan putih, kasih highlight orange transparan */
+.fi-sidebar-item-active > a {
+  background: rgba(243, 113, 0, 0.35) !important; /* fin-orange-1 */
+}
+
+.fi-sidebar .fi-sidebar-item-active {
+  background: rgba(243, 113, 0, 0.16) !important;
+  border-left: 3px solid var(--fin-orange-1) !important;
+}
+
+/* Layer aktif (biar konsisten) */
+.fi-sidebar .fi-sidebar-item-active,
+.fi-sidebar .fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item.fi-active > a {
+  background: rgba(243, 113, 0, 0.28) !important;
+}
+
+/* Tulisan/icon item aktif tetap kebaca */
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-icon {
+  color: rgba(255, 255, 255, 0.98) !important;
+}
+
+/* Hover nav */
+.fi-sidebar .fi-sidebar-item > a:hover {
+  background: rgba(243, 80, 10, 0.22) !important; /* fin-orange-2 */
+}
+
+/* Focus nav */
+.fi-sidebar .fi-sidebar-item > a:focus,
+.fi-sidebar .fi-sidebar-item > a:focus-visible {
+  background: rgba(243, 80, 10, 0.26) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(243, 80, 10, 0.22) !important;
+}
+
+/* Card/section */
+.fi-wi,
+.fi-section {
+  border: none !important;
+  box-shadow: 0 10px 30px rgba(90, 0, 6, 0.08) !important; /* fin-maroon-dark */
+}
+
+/* Focus field (select/input) -> maroon */
+.fi-input-wrp:focus-within,
+.fi-select-wrp:focus-within,
+.fi-textarea-wrp:focus-within {
+  border-color: var(--fin-maroon) !important;
+  box-shadow: 0 0 0 3px rgba(146, 0, 4, 0.28) !important;
+}
+
+.fi-select:focus,
+.fi-input:focus,
+.fi-textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--fin-maroon) !important;
+}
+
+/* Tombol primary ("Tampilkan") -> maroon */
+.fi-btn.fi-color.fi-color-primary,
+.fi-btn.fi-color-primary {
+  background-color: var(--fin-maroon) !important;
+  border-color: var(--fin-maroon) !important;
+  color: #fff !important;
+}
+
+.fi-btn.fi-color.fi-color-primary:hover,
+.fi-btn.fi-color-primary:hover {
+  background-color: var(--fin-maroon-dark) !important;
+  border-color: var(--fin-maroon-dark) !important;
+}
+
+.fi-btn.fi-color.fi-color-primary:focus-visible,
+.fi-btn.fi-color-primary:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(146, 0, 4, 0.30) !important;
+}
+/* Contoh: header tabel lebih tegas */
+.fi-ta-table thead th {
+    @apply bg-red-50 text-red-900 font-semibold;
+}
+
+/* Stripe manual (kalau kamu tidak pakai ->striped()) */
+.fi-ta-table tbody tr:nth-child(even) {
+    @apply bg-slate-50;
+}
+
+/* Hover row biar ada feedback */
+.fi-ta-table tbody tr:hover {
+    @apply bg-red-100/60;
+}
+
+/* Border & radius container tabel biar “card”-nya lebih kelihatan */
+.fi-ta-ctn {
+    @apply ring-1 ring-red-200/70 rounded-xl;
+}
+
+/* base */
+.fi-wi-stats-overview .stat-card{
+  border-radius: 0.75rem !important;
+  border: 1px solid rgba(0,0,0,.08) !important;
+
+  /* TIMBUL */
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,.12),
+              0 8px 10px -6px rgba(0,0,0,.10) !important;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+/* hover biar makin timbul */
+.fi-wi-stats-overview .stat-card:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,.25) !important;
+  filter: saturate(1.05);
+}
+
+
+/* gradient backgrounds */
+.fi-wi-stats-overview .stat-card--success{
+  background: linear-gradient(135deg, #d1d2fa 0%, #f3b9a7 45%, #e7946e 100%) !important;
+}
+
+.fi-wi-stats-overview .stat-card--warning{
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 45%, #fbbf24 100%) !important;
+}
+
+.fi-wi-stats-overview .stat-card--info{
+  background: linear-gradient(135deg, #dbeafe 0%, #bfc8fe 45%, #bc93fd 100%) !important;
+}
+
+
+/* paksa semua teks jadi hitam (judul, angka, deskripsi, dll) */
+.fi-wi-stats-overview .stat-card,
+.fi-wi-stats-overview .stat-card *{
+  color: #111827 !important;
+}
+
+
+/* icon juga ikut hitam */
+.fi-wi-stats-overview .stat-card svg{
+  color: #111827 !important;
+}
+
+
+/* optional: biar angka lebih tegas */
+.fi-wi-stats-overview .stat-card .fi-wi-stats-overview-stat-value{
+  font-weight: 800 !important;
+}
+
+
+
