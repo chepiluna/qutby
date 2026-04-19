@@ -9,50 +9,60 @@ use Illuminate\Support\Facades\DB;
 
 class Cashflow30DaysChart extends ChartWidget
 {
-    protected ?string $heading = 'Cashflow 30 Hari Terakhir';
+    protected ?string $heading = 'Cashflow Overview (Last 30 Days)';
     protected static ?int $sort = 2;
-    protected int|string|array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 1;
+
+    // 🔥 kecilin tinggi chart
 
     protected function getType(): string
     {
-        return 'line';
+        return 'bar';
     }
 
-    // Ini untuk background putih di dalam kotak chart (canvas) jadi warna palette kamu
     protected function getOptions(): RawJs
     {
         return RawJs::make(<<<'JS'
 {
-  plugins: [
-    {
-      id: 'canvasBackground',
-      beforeDraw: (chart, args, options) => {
-        const { ctx } = chart;
-        ctx.save();
-        ctx.globalCompositeOperation = 'destination-over';
-        ctx.fillStyle = '#3c0000';
-        ctx.fillRect(0, 0, chart.width, chart.height);
-        ctx.restore();
-      },
-    },
-  ],
+  responsive: true,
+  maintainAspectRatio: false,
+
   plugins: {
     legend: {
-      labels: {
-        color: '#ff8478',
-      },
+      position: 'top'
     },
+    tooltip: {
+      callbacks: {
+        label: function(context) {
+          let value = context.raw || 0;
+          return context.dataset.label + ': Rp ' + value.toLocaleString('id-ID');
+        }
+      }
+    }
   },
+
   scales: {
     x: {
-      ticks: { color: '#e71300ff' },
-      grid: { color: 'rgba(0, 0, 0, 0.12)' },
+      stacked: false,
+      grid: {
+        display: false
+      }
     },
     y: {
-      ticks: { color: '#ff1500ff' },
-      grid: { color: 'rgba(0, 0, 0, 0.12)' },
-    },
-  },
+      beginAtZero: true,
+      ticks: {
+        callback: function(value) {
+          if (value >= 1000000000) return (value / 1000000000) + 'B';
+          if (value >= 1000000) return (value / 1000000) + 'M';
+          if (value >= 1000) return (value / 1000) + 'K';
+          return value;
+        }
+      },
+      grid: {
+        color: 'rgba(0,0,0,0.05)'
+      }
+    }
+  }
 }
 JS);
     }
@@ -62,13 +72,15 @@ JS);
         $start = now()->subDays(29)->startOfDay();
         $end   = now()->endOfDay();
 
-        $incomeRows = DB::table('penjualan')
-            ->selectRaw('DATE(tanggal_faktur) as d, SUM(total_netto) as total')
-            ->whereBetween('tanggal_faktur', [$start, $end])
+        // 🔥 CASH IN (REAL)
+        $incomeRows = DB::table('pembayaran')
+            ->selectRaw('DATE(tanggal_bayar) as d, SUM(jumlah_bayar - COALESCE(diskon_termin,0)) as total')
+            ->whereBetween('tanggal_bayar', [$start, $end])
             ->groupBy('d')
             ->orderBy('d')
             ->pluck('total', 'd');
 
+        // 🔥 CASH OUT
         $expenseRows = DB::table('pengeluaran')
             ->selectRaw('DATE(tanggal_pengeluaran) as d, SUM(jumlah) as total')
             ->whereBetween('tanggal_pengeluaran', [$start, $end])
@@ -93,22 +105,18 @@ JS);
         return [
             'datasets' => [
                 [
-                    'label' => 'Pemasukan',
+                    'label' => 'Cash In',
                     'data' => $income,
-                    'borderColor' => '#e41a08ff',
-                    'backgroundColor' => 'rgba(0, 0, 0, 0.18)',
-                    'pointBackgroundColor' => '#ff1500ff',
-                    'fill' => true,
-                    'tension' => 0,
+                    'backgroundColor' => '#22c55e',
+                    'borderRadius' => 6,
+                    'barThickness' => 18,
                 ],
                 [
-                    'label' => 'Pengeluaran',
+                    'label' => 'Cash Out',
                     'data' => $expense,
-                    'borderColor' => '#8f0801ff',
-                    'backgroundColor' => 'rgba(0, 0, 0, 0.18)',
-                    'pointBackgroundColor' => '#ff0d00ff',
-                    'fill' => true,
-                    'tension' => 0,
+                    'backgroundColor' => '#ef4444',
+                    'borderRadius' => 6,
+                    'barThickness' => 18,
                 ],
             ],
             'labels' => $labels,

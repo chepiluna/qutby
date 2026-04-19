@@ -7,6 +7,8 @@ use App\Filament\Resources\Pengeluarans\Pages\EditPengeluaran;
 use App\Filament\Resources\Pengeluarans\Pages\ListPengeluarans;
 use App\Filament\Resources\Pengeluarans\Pages\ViewPengeluaran;
 use App\Models\Pengeluaran;
+use App\Models\DaftarAkun;
+
 use BackedEnum;
 use Filament\Actions;
 use Filament\Forms;
@@ -38,6 +40,7 @@ class PengeluaranResource extends Resource
         return $schema->schema([
             Section::make('Data Pengeluaran')
                 ->schema([
+
                     Forms\Components\TextInput::make('kode_pengeluaran')
                         ->label('Kode Pengeluaran')
                         ->required()
@@ -49,7 +52,7 @@ class PengeluaranResource extends Resource
 
                             $lastNumber = $lastKode ? (int) substr($lastKode, 2) : 0;
 
-                            return 'BB' . str_pad($lastNumber + 1, 2, '0', STR_PAD_LEFT);
+                            return 'BB' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
                         })
                         ->readOnly(),
 
@@ -58,19 +61,46 @@ class PengeluaranResource extends Resource
                         ->default(now()->toDateString())
                         ->required(),
 
-                    Forms\Components\Select::make('kategori_pengeluaran_id')
-                        ->label('Kategori')
-                        ->relationship('kategoriPengeluaran', 'nama')
+                    // ✅ AKUN BEBAN (HEADER 5 SAJA)
+                    Forms\Components\Select::make('daftar_akun_id')
+                        ->label('Akun Beban')
+                        ->options(
+                            DaftarAkun::where('header_akun', '5')
+                                ->whereNull('parent_id') // ⬅️ cuma header "Beban"
+                                ->get()
+                                ->mapWithKeys(fn ($akun) => [
+                                    $akun->id => $akun->kode_akun . ' - ' . $akun->nama_akun
+                                ])
+                        )
+                        ->searchable()
+                        ->preload()
+                        ->required(),
+
+                    // ✅ DIBAYAR DARI (HEADER 1)
+                    Forms\Components\Select::make('kas_bank_id')
+                        ->label('Dibayar Dari')
+                        ->options(
+                            DaftarAkun::where('header_akun', '1')
+                                ->whereNotNull('parent_id')
+                                ->where(function ($q) {
+                                    $q->where('nama_akun', 'like', '%kas%')
+                                    ->orWhere('nama_akun', 'like', '%bank%');
+                                })
+                                ->get()
+                                ->mapWithKeys(fn ($akun) => [
+                                    $akun->id => $akun->kode_akun . ' - ' . $akun->nama_akun
+                                ])
+                        )
                         ->searchable()
                         ->preload()
                         ->required(),
 
                     Forms\Components\TextInput::make('deskripsi')
-                        ->label('Deskripsi')
+                        ->label('Keterangan')
                         ->maxLength(255),
 
                     Forms\Components\TextInput::make('jumlah')
-                        ->label('Jumlah')
+                        ->label('Nominal')
                         ->required()
                         ->prefix('Rp')
                         ->mask(RawJs::make('$money($input)'))
@@ -106,8 +136,14 @@ class PengeluaranResource extends Resource
                     ->date()
                     ->sortable(),
 
-                TextColumn::make('kategoriPengeluaran.nama')
-                    ->label('Kategori')
+                TextColumn::make('akunBeban.nama_akun')
+                    ->label('Akun Beban')
+                    ->sortable()
+                    ->searchable(),
+
+                // ✅ tampil kas/bank juga
+                TextColumn::make('kasBank.nama_akun')
+                    ->label('Dibayar Dari')
                     ->sortable()
                     ->searchable(),
 
@@ -132,7 +168,6 @@ class PengeluaranResource extends Resource
             'index'  => ListPengeluarans::route('/'),
             'create' => CreatePengeluaran::route('/create'),
             'view'   => ViewPengeluaran::route('/{record}'),
-            //'edit'   => EditPengeluaran::route('/{record}/edit'),
         ];
     }
     
@@ -140,5 +175,4 @@ class PengeluaranResource extends Resource
     {
         return Filament::getCurrentPanel()?->getId() === 'finance';
     }
-
 }

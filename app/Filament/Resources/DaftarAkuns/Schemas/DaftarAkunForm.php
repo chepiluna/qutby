@@ -61,16 +61,6 @@ class DaftarAkunForm
                 ])
                 ->columns(2)
                 ->columnSpanFull(),*/
-
-            Section::make('Saldo Awal')
-                ->schema([
-                    TextInput::make('saldo_awal_nominal')
-                        ->label('Saldo Awal (Periode Pertama)')
-                        ->numeric()
-                        ->default(0)
-                        ->prefix('Rp'),
-                ])
-                ->columnSpanFull(),
         ]);
     }
 }

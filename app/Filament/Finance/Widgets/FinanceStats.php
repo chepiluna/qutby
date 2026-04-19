@@ -7,10 +7,12 @@ use App\Models\Pengeluaran;
 use App\Models\Penjualan;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\DB; // ⬅️ tambahin di atas
 
 class FinanceStats extends BaseWidget
 {
     protected static ?int $sort = 1;
+    protected int | string | array $columnSpan = 2; // full atas
 
     protected function getStats(): array
     {
@@ -20,7 +22,8 @@ class FinanceStats extends BaseWidget
         $totalPembayaran = Pembayaran::query()
             ->whereMonth('created_at', $bulan)
             ->whereYear('created_at', $tahun)
-            ->sum('jumlah_bayar');
+            ->select(DB::raw('SUM(jumlah_bayar - COALESCE(diskon_termin,0)) as total'))
+            ->value('total');
 
         $totalPengeluaran = Pengeluaran::query()
             ->whereMonth('created_at', $bulan)

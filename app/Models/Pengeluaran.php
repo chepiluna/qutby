@@ -7,30 +7,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Pengeluaran extends Model
 {
-    // Nama tabel di database
     protected $table = 'pengeluaran';
 
-    // Kolom yang boleh diisi mass-assignment
     protected $fillable = [
         'kode_pengeluaran',
         'tanggal_pengeluaran',
-        'kategori_pengeluaran_id',
+        'daftar_akun_id', // akun beban (header 5)
+        'kas_bank_id',    // dibayar dari (header 1)
         'deskripsi',
         'jumlah',
-        'status',
         'bukti_transaksi',
     ];
 
-    // Casting tipe data
     protected $casts = [
         'tanggal_pengeluaran' => 'date',
         'jumlah'              => 'decimal:2',
     ];
 
-    // Relasi ke tabel kategori_pengeluaran
-    public function kategoriPengeluaran(): BelongsTo
+    /**
+     * Relasi ke akun beban
+     */
+    public function akunBeban(): BelongsTo
     {
-        return $this->belongsTo(KategoriPengeluaran::class, 'kategori_pengeluaran_id');
+        return $this->belongsTo(DaftarAkun::class, 'daftar_akun_id');
     }
-    
+
+    /**
+     * Relasi ke kas / bank (dibayar dari)
+     */
+    public function kasBank(): BelongsTo
+    {
+        return $this->belongsTo(DaftarAkun::class, 'kas_bank_id');
+    }
 }

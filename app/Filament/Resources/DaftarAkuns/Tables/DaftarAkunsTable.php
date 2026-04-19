@@ -58,19 +58,6 @@ class DaftarAkunsTable
                     })
                     ->html(),
 
-                TextColumn::make('saldo_awal_nominal')
-                    ->label('Saldo Awal')
-                    ->formatStateUsing(function ($state, DaftarAkun $record) {
-                        $formatted = 'Rp ' . number_format($state ?? 0, 0, ',', '.');
-
-                        if (self::isTwoDigitParent($record)) {
-                            return new HtmlString('<strong>' . $formatted . '</strong>');
-                        }
-
-                        return $formatted;
-                    })
-                    ->html(),
-
                 // saldo_normal DIHILANGKAN dulu
                 // parent_id DIHILANGKAN (memang tidak ada column parent_id di sini)
             ])

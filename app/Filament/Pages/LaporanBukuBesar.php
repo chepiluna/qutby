@@ -6,7 +6,6 @@ use App\Models\DaftarAkun;
 use App\Models\JurnalUmum;
 use App\Models\JurnalUmumDetail;
 use BackedEnum;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
@@ -29,15 +28,14 @@ class LaporanBukuBesar extends Page implements HasSchemas
 
     protected string $view = 'filament.pages.laporan-buku-besar';
 
-    /** form state */
     public ?array $data = [];
 
     public function mount(): void
     {
         $this->form->fill([
             'akun_id' => null,
-            'from' => null,
-            'until' => null,
+            'bulan' => now()->format('m'),
+            'tahun' => now()->format('Y'),
         ]);
     }
 
@@ -48,6 +46,7 @@ class LaporanBukuBesar extends Page implements HasSchemas
                 Section::make('Filter')
                     ->schema([
                         Grid::make(3)->schema([
+
                             Select::make('akun_id')
                                 ->label('Akun')
                                 ->options(fn () => DaftarAkun::orderBy('kode_akun')->pluck('nama_akun', 'id'))
@@ -55,8 +54,34 @@ class LaporanBukuBesar extends Page implements HasSchemas
                                 ->placeholder('Semua akun')
                                 ->live(),
 
-                            DatePicker::make('from')->label('Dari tanggal')->live(),
-                            DatePicker::make('until')->label('Sampai tanggal')->live(),
+                            Select::make('bulan')
+                                ->label('Bulan')
+                                ->options([
+                                    '01' => 'Januari',
+                                    '02' => 'Februari',
+                                    '03' => 'Maret',
+                                    '04' => 'April',
+                                    '05' => 'Mei',
+                                    '06' => 'Juni',
+                                    '07' => 'Juli',
+                                    '08' => 'Agustus',
+                                    '09' => 'September',
+                                    '10' => 'Oktober',
+                                    '11' => 'November',
+                                    '12' => 'Desember',
+                                ])
+                                ->required()
+                                ->live(),
+
+                            Select::make('tahun')
+                                ->label('Tahun')
+                                ->options([
+                                    '2024' => '2024',
+                                    '2025' => '2025',
+                                    '2026' => '2026',
+                                ])
+                                ->required()
+                                ->live(),
                         ]),
                     ]),
             ])
@@ -65,26 +90,14 @@ class LaporanBukuBesar extends Page implements HasSchemas
 
     private function normalSideByHeader(?int $headerAkun): string
     {
-        // 1 Aset: debit
-        // 2 Kewajiban: kredit
-        // 3 Modal: kredit
-        // 4 Pendapatan: kredit
-        // 5 Beban: debit
         return in_array((int) $headerAkun, [1, 5], true) ? 'debit' : 'kredit';
     }
 
-    /**
-     * Override saldo normal per akun (tanpa nambah field di tabel akun).
-     * Default ikut header, tapi akun kontra dibalik (contoh: 412 potongan penjualan = debit). [web:886]
-     */
     private function normalSideForAccount(DaftarAkun $akun): string
     {
         $normal = $this->normalSideByHeader((int) $akun->header_akun);
 
-        // Override akun kontra (pakai kode_akun biar stabil)
-        $contraRevenueDebit = [
-            '412', // Potongan Penjualan / Sales Discounts => debit [web:886]
-        ];
+        $contraRevenueDebit = ['412'];
 
         if (in_array((string) $akun->kode_akun, $contraRevenueDebit, true)) {
             return 'debit';
@@ -96,15 +109,20 @@ class LaporanBukuBesar extends Page implements HasSchemas
     public function getLedgersProperty(): array
     {
         $state = $this->form->getState();
-        $akunId = $state['akun_id'] ?? null;
-        $from = $state['from'] ?? null;
-        $until = $state['until'] ?? null;
 
-        if (! $from || ! $until) {
+        $akunId = $state['akun_id'] ?? null;
+        $bulan = $state['bulan'] ?? null;
+        $tahun = $state['tahun'] ?? null;
+
+        if (! $bulan || ! $tahun) {
             return [];
         }
 
+        $from = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+        $until = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+
         $akunQuery = DaftarAkun::query()->orderBy('kode_akun');
+
         if ($akunId) {
             $akunQuery->whereKey($akunId);
         }
@@ -113,16 +131,15 @@ class LaporanBukuBesar extends Page implements HasSchemas
         $result = [];
 
         foreach ($akuns as $akun) {
-            // PAKAI OVERRIDE DI SINI
             $normalSide = $this->normalSideForAccount($akun);
 
-            // Temporary: Pendapatan(4) & Beban(5) reset tiap awal tahun
             $isTemporary = in_array((int) $akun->header_akun, [4, 5], true);
 
             $startForBefore = $isTemporary
-                ? \Carbon\Carbon::parse($from)->startOfYear()->toDateString()
+                ? $from->copy()->startOfYear()
                 : null;
 
+            // 🔥 MUTASI SEBELUM BULAN (INI JADI SALDO AWAL)
             $debitBefore = JurnalUmumDetail::query()
                 ->where('daftar_akun_id', $akun->id)
                 ->whereHas('jurnalUmum', function ($q) use ($from, $startForBefore) {
@@ -147,12 +164,11 @@ class LaporanBukuBesar extends Page implements HasSchemas
                 ->where('posisi', 'kredit')
                 ->sum('nominal');
 
-            $mutasiBefore = $normalSide === 'debit'
-                ? ((float) $debitBefore - (float) $kreditBefore)
-                : ((float) $kreditBefore - (float) $debitBefore);
+            $saldoAwal = $normalSide === 'debit'
+                ? ($debitBefore - $kreditBefore)
+                : ($kreditBefore - $debitBefore);
 
-            $saldoAwal = ($isTemporary ? 0.0 : (float) ($akun->saldo_awal_nominal ?? 0)) + $mutasiBefore;
-
+            // 🔥 TRANSAKSI DALAM BULAN
             $rows = JurnalUmumDetail::query()
                 ->with(['jurnalUmum'])
                 ->where('daftar_akun_id', $akun->id)

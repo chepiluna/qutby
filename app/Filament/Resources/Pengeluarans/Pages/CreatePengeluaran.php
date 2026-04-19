@@ -3,10 +3,8 @@
 namespace App\Filament\Resources\Pengeluarans\Pages;
 
 use App\Filament\Resources\Pengeluarans\PengeluaranResource;
-use App\Models\DaftarAkun;
 use App\Models\JurnalUmum;
 use App\Models\JurnalUmumDetail;
-use App\Models\KategoriPengeluaran;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\DB;
@@ -42,11 +40,9 @@ class CreatePengeluaran extends CreateRecord
             ->label('Batal');
     }
 
+    // ❌ HAPUS status & paid_at (ga dipakai lagi)
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['status'] = 'dibayar';
-        $data['paid_at'] = now();
-
         return $data;
     }
 
@@ -55,44 +51,46 @@ class CreatePengeluaran extends CreateRecord
         DB::transaction(function () {
             $record = $this->record;
 
+            // 🔢 generate kode jurnal
             $last = JurnalUmum::latest('id')->first();
             $nextNumber = ($last?->id ?? 0) + 1;
             $kodeJurnal = 'JU-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
+            // 🧾 create jurnal
             $jurnal = JurnalUmum::create([
                 'tanggal'     => $record->tanggal_pengeluaran,
                 'kode_jurnal' => $kodeJurnal,
                 'deskripsi'   => 'Pengeluaran: ' . $record->deskripsi,
             ]);
 
-            $kategori = KategoriPengeluaran::with('akun')->find($record->kategori_pengeluaran_id);
-            $akunBeban = $kategori?->akun;
+            // ✅ ambil langsung dari input user
+            $akunBebanId = $record->daftar_akun_id;
+            $akunKasId   = $record->kas_bank_id;
 
-            $akunKas = DaftarAkun::where('kode_akun', '111')->first();
-
-            if (! $akunKas) {
-                throw new \RuntimeException('Akun kas kode_akun=111 tidak ditemukan.');
+            if (! $akunBebanId || ! $akunKasId) {
+                throw new \RuntimeException('Akun beban atau kas/bank belum dipilih.');
             }
 
-            if (! $akunBeban) {
-                throw new \RuntimeException('Kategori pengeluaran belum punya akun (daftar_akun_id masih kosong).');
-            }
-
+            // 💰 Debit Beban
             JurnalUmumDetail::create([
                 'jurnal_umum_id' => $jurnal->id,
-                'daftar_akun_id' => $akunBeban->id,
+                'daftar_akun_id' => $akunBebanId,
                 'posisi'         => 'debit',
                 'nominal'        => $record->jumlah,
             ]);
 
+            // 💸 Kredit Kas/Bank
             JurnalUmumDetail::create([
                 'jurnal_umum_id' => $jurnal->id,
-                'daftar_akun_id' => $akunKas->id,
+                'daftar_akun_id' => $akunKasId,
                 'posisi'         => 'kredit',
                 'nominal'        => $record->jumlah,
             ]);
 
-            $record->update(['jurnal_umum_id' => $jurnal->id]);
+            // 🔗 simpan relasi
+            $record->update([
+                'jurnal_umum_id' => $jurnal->id
+            ]);
         });
     }
 }

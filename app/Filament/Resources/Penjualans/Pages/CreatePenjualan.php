@@ -10,6 +10,7 @@ use App\Models\Penjualan;
 use App\Models\Piutang;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
+use App\Models\Pembayaran;
 
 class CreatePenjualan extends CreateRecord
 {
@@ -233,6 +234,19 @@ class CreatePenjualan extends CreateRecord
                 'diskon_persen'    => optional($penjualan->termin)->diskon_persen ?? 0,
                 'hari_diskon'      => optional($penjualan->termin)->hari_diskon ?? 0,
                 'hari_jatuh_tempo' => optional($penjualan->termin)->hari_jatuh_tempo ?? 0,
+            ]);
+        }
+
+        // 🔥 TAMBAH INI
+        if ($tipe === 'tunai') {
+
+            Pembayaran::create([
+                'penjualan_id'   => $penjualan->id,
+                'tanggal_bayar'  => $penjualan->tanggal_faktur,
+                'jumlah_bayar'   => $totalNetto,
+                'diskon_termin'  => 0,
+                'metode_bayar' => $penjualan->metode_bayar ?? 'cash',
+                'keterangan'     => 'Pembayaran tunai otomatis',
             ]);
         }
     }
