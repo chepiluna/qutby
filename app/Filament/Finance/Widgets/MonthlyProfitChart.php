@@ -8,65 +8,68 @@ use Carbon\Carbon;
 
 class MonthlyProfitChart extends ChartWidget
 {
-    protected ?string $heading = 'Tren Profit Bulanan';
+    protected ?string $heading = 'Tren Profit 12 Bulan Terakhir';
 
-    protected static ?int $sort = 3; // 🔥 WAJIB
+    protected static ?int $sort = 3;
 
-    // 🔥 BIKIN FULL LEBAR (ini penting)
     protected int | string | array $columnSpan = 1;
 
     protected function getData(): array
     {
-        // 💰 INCOME dari pembayaran
-        $income = DB::table('pembayaran')
-            ->selectRaw('DATE_FORMAT(tanggal_bayar, "%Y-%m") as month, SUM(jumlah_bayar) as total_income')
-            ->groupBy('month');
+        $labels = [];
+        $incomeData = [];
+        $expenseData = [];
+        $profitData = [];
 
-        // 💸 EXPENSE dari pengeluaran
-        $expense = DB::table('pengeluaran')
-            ->selectRaw('DATE_FORMAT(tanggal_pengeluaran, "%Y-%m") as month, SUM(jumlah) as total_expense')
-            ->groupBy('month');
+        // Ambil 12 bulan terakhir
+        for ($i = 11; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
 
-        // 🔗 JOIN income & expense
-        $data = DB::table(DB::raw("({$income->toSql()}) as i"))
-            ->mergeBindings($income)
-            ->leftJoinSub($expense, 'e', 'i.month', '=', 'e.month')
-            ->selectRaw('
-                i.month,
-                total_income,
-                COALESCE(total_expense, 0) as total_expense,
-                (total_income - COALESCE(total_expense, 0)) as profit
-            ')
-            ->orderBy('i.month')
-            ->get();
+            $income = DB::table('pembayaran')
+                ->whereNotNull('tanggal_bayar')
+                ->whereYear('tanggal_bayar', $date->year)
+                ->whereMonth('tanggal_bayar', $date->month)
+                ->sum('jumlah_bayar');
 
-        // 🎯 Format label bulan
-        $labels = $data->pluck('month')->map(function ($m) {
-            return Carbon::createFromFormat('Y-m', $m)->format('M Y');
-        });
+            $expense = DB::table('pengeluaran')
+                ->whereNotNull('tanggal_pengeluaran')
+                ->whereYear('tanggal_pengeluaran', $date->year)
+                ->whereMonth('tanggal_pengeluaran', $date->month)
+                ->sum('jumlah');
+
+            $profit = $income - $expense;
+
+            $labels[] = $date->translatedFormat('M Y');
+            $incomeData[] = (float) $income;
+            $expenseData[] = (float) $expense;
+            $profitData[] = (float) $profit;
+        }
 
         return [
             'datasets' => [
                 [
                     'label' => 'Income',
-                    'data' => $data->pluck('total_income'),
+                    'data' => $incomeData,
                     'borderColor' => '#3b82f6',
-                    'backgroundColor' => 'rgba(59,130,246,0.2)',
+                    'backgroundColor' => 'rgba(59,130,246,0.15)',
                     'tension' => 0.4,
+                    'fill' => false,
                 ],
                 [
                     'label' => 'Expense',
-                    'data' => $data->pluck('total_expense'),
+                    'data' => $expenseData,
                     'borderColor' => '#ef4444',
-                    'backgroundColor' => 'rgba(239,68,68,0.2)',
+                    'backgroundColor' => 'rgba(239,68,68,0.15)',
                     'tension' => 0.4,
+                    'fill' => false,
                 ],
                 [
                     'label' => 'Profit',
-                    'data' => $data->pluck('profit'),
+                    'data' => $profitData,
                     'borderColor' => '#22c55e',
-                    'backgroundColor' => 'rgba(34,197,94,0.2)',
+                    'backgroundColor' => 'rgba(34,197,94,0.15)',
                     'tension' => 0.4,
+                    'fill' => false,
                 ],
             ],
             'labels' => $labels,
