@@ -28,9 +28,19 @@
 
                 {{-- HEADER --}}
                 <div class="flex justify-between items-center mb-4">
-                    <div class="text-base font-semibold">
-                        {{ $item['customer'] }}
+                    <div>
+                        <div class="text-base font-semibold">
+                            {{ $item['customer'] }}
+                        </div>
+
+                        <div class="text-sm text-gray-500 mt-1">
+                            Status:
+                            <span class="{{ $item['status'] == 'Lunas' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">
+                                {{ $item['status'] }}
+                            </span>
+                        </div>
                     </div>
+
                     <div class="text-sm text-gray-500">
                         NP: {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                     </div>
@@ -44,6 +54,7 @@
                             <tr class="border-b">
                                 <th class="py-3 px-3 text-center font-semibold">Tanggal</th>
                                 <th class="py-3 px-3 text-center font-semibold">Ref</th>
+                                <th class="py-3 px-3 text-left font-semibold">Keterangan</th>
                                 <th class="py-3 px-3 text-right font-semibold">Debit</th>
                                 <th class="py-3 px-3 text-right font-semibold">Kredit</th>
                                 <th class="py-3 px-3 text-right font-semibold">Saldo</th>
@@ -57,13 +68,18 @@
                                 <tr class="hover:bg-gray-50">
 
                                     {{-- TANGGAL --}}
-                                    <td class="py-2 px-3 text-center">
+                                    <td class="py-2 px-3 text-center whitespace-nowrap">
                                         {{ \Carbon\Carbon::parse($row['tanggal'])->format('d-m-Y') }}
                                     </td>
 
                                     {{-- REF --}}
                                     <td class="py-2 px-3 text-center">
                                         {{ $row['ref'] }}
+                                    </td>
+
+                                    {{-- KETERANGAN --}}
+                                    <td class="py-2 px-3">
+                                        {{ $row['keterangan'] }}
                                     </td>
 
                                     {{-- DEBIT --}}
@@ -85,6 +101,28 @@
                             @endforeach
 
                         </tbody>
+
+                        {{-- FOOTER TOTAL --}}
+                        <tfoot class="bg-gray-50 border-t">
+                            <tr>
+                                <td colspan="3" class="py-3 px-3 font-semibold text-right">
+                                    TOTAL
+                                </td>
+
+                                <td class="py-3 px-3 text-right font-semibold text-blue-600">
+                                    {{ number_format($item['total_debit'],0,',','.') }}
+                                </td>
+
+                                <td class="py-3 px-3 text-right font-semibold text-green-600">
+                                    {{ number_format($item['total_kredit'],0,',','.') }}
+                                </td>
+
+                                <td class="py-3 px-3 text-right font-bold text-orange-600">
+                                    {{ number_format($item['saldo_akhir'],0,',','.') }}
+                                </td>
+                            </tr>
+                        </tfoot>
+
                     </table>
                 </div>
 

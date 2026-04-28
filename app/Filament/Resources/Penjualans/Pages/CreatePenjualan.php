@@ -222,32 +222,52 @@ class CreatePenjualan extends CreateRecord
 
         // 🔥 PIUTANG HANYA UNTUK KREDIT
         if ($tipe === 'kredit') {
-            Piutang::create([
-                'pelanggan_id'     => $penjualan->pelanggan_id,
-                'penjualan_id'     => $penjualan->id,
-                'no_faktur'        => $penjualan->no_faktur,
-                'tanggal_faktur'   => $penjualan->tanggal_faktur,
-                'termin_id'        => $penjualan->termin_id,
-                'total_piutang'    => $totalNetto,
-                'sisa_piutang'     => $totalNetto,
-                'status'           => 'belum_lunas',
-                'diskon_persen'    => optional($penjualan->termin)->diskon_persen ?? 0,
-                'hari_diskon'      => optional($penjualan->termin)->hari_diskon ?? 0,
-                'hari_jatuh_tempo' => optional($penjualan->termin)->hari_jatuh_tempo ?? 0,
-            ]);
+
+            Piutang::updateOrCreate(
+                [
+                    'penjualan_id' => $penjualan->id,
+                ],
+                [
+                    'pelanggan_id'     => $penjualan->pelanggan_id,
+                    'no_faktur'        => $penjualan->no_faktur,
+                    'tanggal_faktur'   => $penjualan->tanggal_faktur,
+                    'termin_id'        => $penjualan->termin_id,
+                    'total_piutang'    => $totalNetto,
+                    'sisa_piutang'     => $totalNetto,
+                    'status'           => 'belum_lunas',
+                    'diskon_persen'    => optional($penjualan->termin)->diskon_persen ?? 0,
+                    'hari_diskon'      => optional($penjualan->termin)->hari_diskon ?? 0,
+                    'hari_jatuh_tempo' => optional($penjualan->termin)->hari_jatuh_tempo ?? 0,
+
+                    'tgl_jatuh_tempo'  => \Carbon\Carbon::parse($penjualan->tanggal_faktur)
+                                            ->addDays(optional($penjualan->termin)->hari_jatuh_tempo ?? 0),
+                ]
+            );
         }
 
-        // 🔥 TAMBAH INI
-        if ($tipe === 'tunai') {
+        $status = $tipe === 'tunai' ? 'lunas' : 'belum_lunas';
 
-            Pembayaran::create([
-                'penjualan_id'   => $penjualan->id,
-                'tanggal_bayar'  => $penjualan->tanggal_faktur,
-                'jumlah_bayar'   => $totalNetto,
-                'diskon_termin'  => 0,
-                'metode_bayar' => $penjualan->metode_bayar ?? 'cash',
-                'keterangan'     => 'Pembayaran tunai otomatis',
-            ]);
+        $piutangId = null;
+
+        if ($tipe === 'kredit') {
+            $piutang = Piutang::where('penjualan_id', $penjualan->id)->first();
+            $piutangId = $piutang?->id;
         }
+
+        Pembayaran::create([
+            'penjualan_id'   => $penjualan->id,
+            'piutang_id'     => $piutangId,
+            'customer_id'    => $penjualan->pelanggan_id,
+            'tanggal_bayar'  => $tipe === 'tunai'
+                                ? $penjualan->tanggal_faktur
+                                : null,
+            'jumlah_bayar'   => $totalNetto,
+            'diskon_termin'  => 0,
+            'metode_bayar'   => $tipe === 'tunai'
+                                ? ($penjualan->metode_bayar ?? 'cash')
+                                : null,
+            'jenis'          => $tipe,
+            'keterangan'     => $status,
+        ]);
     }
 }

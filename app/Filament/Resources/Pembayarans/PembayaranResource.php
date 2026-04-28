@@ -53,7 +53,7 @@ class PembayaranResource extends Resource
             'index'  => ListPembayarans::route('/'),
             'create' => CreatePembayaran::route('/create'),
             'view'   => ViewPembayaran::route('/{record}'),
-            //'edit'   => EditPembayaran::route('/{record}/edit'),
+            'edit'   => EditPembayaran::route('/{record}/edit'),
         ];
     }
     

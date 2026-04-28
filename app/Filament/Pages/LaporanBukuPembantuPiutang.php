@@ -78,7 +78,7 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
         foreach ($customers as $customer) {
 
             // ======================
-            // DEBIT (PIUTANG)
+            // DEBIT (PENJUALAN KREDIT)
             // ======================
             $piutang = Piutang::where('pelanggan_id', $customer->id)
                 ->get()
@@ -86,45 +86,59 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
                     return [
                         'tanggal' => $item->tanggal_faktur,
                         'ref' => $item->no_faktur,
+                        'keterangan' => 'Penjualan Kredit',
                         'debit' => $item->total_piutang,
                         'kredit' => 0,
+                        'urutan' => 1,
                     ];
                 });
 
             // ======================
-            // KREDIT (PEMBAYARAN) 🔥 FIX DI SINI
+            // KREDIT (PELUNASAN)
             // ======================
             $pembayaran = Pembayaran::with(['piutang'])
                 ->whereHas('piutang', function ($q) use ($customer) {
                     $q->where('pelanggan_id', $customer->id);
                 })
+                ->where('keterangan', 'lunas')
                 ->get()
                 ->map(function ($item) {
                     return [
                         'tanggal' => $item->tanggal_bayar,
-                        'ref' => $item->piutang->no_faktur ?? '-', // 🔥 FIX
+                        'ref' => $item->piutang->no_faktur ?? '-',
+                        'keterangan' => 'Pelunasan Piutang',
                         'debit' => 0,
                         'kredit' => $item->jumlah_bayar,
+                        'urutan' => 2,
                     ];
                 });
 
             // ======================
-            // GABUNG & SORT
+            // SORT TANGGAL + URUTAN
             // ======================
             $transaksi = $piutang
                 ->merge($pembayaran)
-                ->sortBy('tanggal')
+                ->sortBy([
+                    ['tanggal', 'asc'],
+                    ['urutan', 'asc'],
+                ])
                 ->values();
 
             // ======================
             // HITUNG SALDO
             // ======================
             $saldo = 0;
+            $totalDebit = 0;
+            $totalKredit = 0;
             $data = [];
 
             foreach ($transaksi as $t) {
                 $saldo += $t['debit'];
                 $saldo -= $t['kredit'];
+
+                $totalDebit += $t['debit'];
+                $totalKredit += $t['kredit'];
+
                 $t['saldo'] = $saldo;
                 $data[] = $t;
             }
@@ -133,6 +147,10 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
                 $laporan[] = [
                     'customer' => $customer->nama_pelanggan,
                     'data' => $data,
+                    'total_debit' => $totalDebit,
+                    'total_kredit' => $totalKredit,
+                    'saldo_akhir' => $saldo,
+                    'status' => $saldo <= 0 ? 'Lunas' : 'Belum Lunas',
                 ];
             }
         }
@@ -140,52 +158,71 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
         return $laporan;
     }
 
+    // =====================================
+    // 🔥 EXPORT PDF
+    // =====================================
     public function exportPdf()
     {
         $state = $this->form->getState();
         $customerId = $state['customer_id'] ?? null;
 
         $customers = $customerId
-            ? \App\Models\Pelanggan::where('id', $customerId)->get()
-            : \App\Models\Pelanggan::all();
+            ? Pelanggan::where('id', $customerId)->get()
+            : Pelanggan::all();
 
         $laporan = [];
 
         foreach ($customers as $customer) {
 
-            $piutang = \App\Models\Piutang::where('pelanggan_id', $customer->id)
+            $piutang = Piutang::where('pelanggan_id', $customer->id)
                 ->get()
                 ->map(function ($item) {
                     return [
                         'tanggal' => $item->tanggal_faktur,
                         'ref' => $item->no_faktur,
+                        'keterangan' => 'Penjualan Kredit',
                         'debit' => $item->total_piutang,
                         'kredit' => 0,
+                        'urutan' => 1,
                     ];
                 });
-
-            $pembayaran = \App\Models\Pembayaran::with('piutang')
+            $pembayaran = Pembayaran::with(['piutang'])
                 ->whereHas('piutang', function ($q) use ($customer) {
                     $q->where('pelanggan_id', $customer->id);
                 })
+                ->where('keterangan', 'lunas')
                 ->get()
                 ->map(function ($item) {
                     return [
                         'tanggal' => $item->tanggal_bayar,
                         'ref' => $item->piutang->no_faktur ?? '-',
+                        'keterangan' => 'Pelunasan Piutang',
                         'debit' => 0,
                         'kredit' => $item->jumlah_bayar,
+                        'urutan' => 2,
                     ];
                 });
 
-            $transaksi = $piutang->merge($pembayaran)->sortBy('tanggal')->values();
+            $transaksi = $piutang
+                ->merge($pembayaran)
+                ->sortBy([
+                    ['tanggal', 'asc'],
+                    ['urutan', 'asc'],
+                ])
+                ->values();
 
             $saldo = 0;
+            $totalDebit = 0;
+            $totalKredit = 0;
             $data = [];
 
             foreach ($transaksi as $t) {
                 $saldo += $t['debit'];
                 $saldo -= $t['kredit'];
+
+                $totalDebit += $t['debit'];
+                $totalKredit += $t['kredit'];
+
                 $t['saldo'] = $saldo;
                 $data[] = $t;
             }
@@ -194,6 +231,10 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
                 $laporan[] = [
                     'customer' => $customer->nama_pelanggan,
                     'data' => $data,
+                    'total_debit' => $totalDebit,
+                    'total_kredit' => $totalKredit,
+                    'saldo_akhir' => $saldo,
+                    'status' => $saldo <= 0 ? 'Lunas' : 'Belum Lunas',
                 ];
             }
         }

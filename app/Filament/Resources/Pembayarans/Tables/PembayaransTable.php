@@ -9,6 +9,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Actions\Action;
+use App\Filament\Resources\Pembayarans\PembayaranResource;
 
 class PembayaransTable
 {
@@ -16,47 +18,76 @@ class PembayaransTable
     {
         return $table
             ->columns([
-                TextColumn::make('tanggal_bayar')
-                    ->label('Tanggal')
+
+                TextColumn::make('penjualan.tanggal_faktur')
+                    ->label('Tgl Faktur')
                     ->date('d-m-Y')
+                    ->sortable(),
+
+                TextColumn::make('tanggal_bayar')
+                    ->label('Tgl Bayar')
+                    ->date('d-m-Y')
+                    ->placeholder('-')
                     ->sortable(),
 
                 TextColumn::make('no_faktur')
                     ->label('No. Faktur')
-                    ->getStateUsing(fn ($record) => 
-                        $record->penjualan?->no_faktur 
-                        ?? $record->piutang?->no_faktur 
-                        ?? '-'
+                    ->getStateUsing(fn ($record) =>
+                        $record->penjualan?->no_faktur ?? '-'
                     )
                     ->searchable(),
 
-                TextColumn::make('jumlah_tampil')
-                    ->label('Total Pembayaran')
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-
-                TextColumn::make('metode_bayar')
-                    ->label('Metode'),
-
-                // kolom nama bank (hanya terisi kalau metode transfer)
-                TextColumn::make('bankAkun.nama_akun')
-                    ->label('Bank')
-                    ->toggleable()
+                TextColumn::make('pelanggan.nama_pelanggan')
+                    ->label('Pelanggan')
+                    ->searchable()
                     ->placeholder('-'),
 
-                TextColumn::make('jenis')
-                    ->label('Jenis'),
+                TextColumn::make('jumlah_bayar')
+                    ->label('Total Tagihan')
+                    ->money('IDR', locale: 'id'),
+
+                TextColumn::make('sisa_piutang')
+                    ->label('Sisa Piutang')
+                    ->getStateUsing(fn ($record) =>
+                        $record->keterangan === 'lunas'
+                            ? 0
+                            : ($record->piutang?->sisa_piutang ?? $record->jumlah_bayar)
+                    )
+                    ->money('IDR', locale: 'id'),
+
+                TextColumn::make('metode_bayar')
+                    ->label('Metode')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                BadgeColumn::make('jenis')
+                    ->label('Jenis')
+                    ->formatStateUsing(fn ($state) => ucfirst($state))
+                    ->colors([
+                        'success' => 'tunai',
+                        'warning' => 'kredit',
+                    ]),
 
                 BadgeColumn::make('keterangan')
-                    ->label('Keterangan')
+                    ->label('Status')
+                    ->formatStateUsing(fn ($state) =>
+                        $state === 'belum_lunas'
+                            ? 'Belum Lunas'
+                            : 'Lunas'
+                    )
                     ->icon(fn (string $state): ?string =>
-                        $state === 'lunas' ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'
+                        $state === 'lunas'
+                            ? 'heroicon-o-check-circle'
+                            : 'heroicon-o-clock'
                     )
                     ->color(fn (string $state): string =>
-                        $state === 'lunas' ? 'success' : 'danger'
+                        $state === 'lunas'
+                            ? 'success'
+                            : 'danger'
                     ),
             ])
+
             ->filters([
-                // filter berdasarkan jenis: tunai / kredit
                 Tables\Filters\SelectFilter::make('jenis')
                     ->label('Jenis')
                     ->options([
@@ -64,17 +95,46 @@ class PembayaransTable
                         'kredit' => 'Kredit',
                     ]),
 
-                // filter berdasarkan status pembayaran: lunas / belum lunas
                 Tables\Filters\SelectFilter::make('keterangan')
                     ->label('Status')
                     ->options([
                         'lunas'       => 'Lunas',
-                        'belum lunas' => 'Belum Lunas',
+                        'belum_lunas' => 'Belum Lunas',
                     ]),
             ])
+
             ->recordActions([
                 ViewAction::make(),
+
+                Action::make('bayar')
+                    ->label('Bayar')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('success')
+
+                    ->visible(fn ($record) =>
+                        $record->jenis === 'kredit' &&
+                        $record->keterangan === 'belum_lunas'
+                    )
+
+                    ->url(fn ($record) =>
+                        PembayaranResource::getUrl('edit', [
+                            'record' => $record->id,
+                        ])
+                    ),
+
+                Action::make('sudah_lunas')
+                    ->label('Lunas')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+
+                    ->visible(fn ($record) =>
+                        $record->jenis === 'kredit' &&
+                        $record->keterangan === 'lunas'
+                    )
+
+                    ->disabled(),
             ])
+
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
