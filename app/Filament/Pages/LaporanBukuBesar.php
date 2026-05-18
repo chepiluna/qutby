@@ -6,6 +6,8 @@ use App\Models\DaftarAkun;
 use App\Models\JurnalUmum;
 use App\Models\JurnalUmumDetail;
 use BackedEnum;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
@@ -28,7 +30,11 @@ class LaporanBukuBesar extends Page implements HasSchemas
 
     protected string $view = 'filament.pages.laporan-buku-besar';
 
-    public ?array $data = [];
+    public ?array $data = [
+        'akun_id' => null,
+        'bulan' => null,
+        'tahun' => null,
+    ];
 
     public function mount(): void
     {
@@ -218,8 +224,68 @@ class LaporanBukuBesar extends Page implements HasSchemas
         return $result;
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('export_pdf')
+                ->label('Export PDF')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('danger')
+                ->action(fn () => $this->exportPdf()),
+        ];
+    }
+
+    public function exportPdf()
+    {
+        $state = $this->form->getState();
+
+        $bulan = data_get($state, 'bulan');
+        $tahun = data_get($state, 'tahun');
+        $akunId = data_get($state, 'akun_id');
+
+        $ledgers = $this->ledgers;
+
+        $namaBulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $periode = 'Semua Periode';
+
+        if ($bulan && $tahun) {
+            $periode = ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun;
+        }
+
+        $akun = null;
+        if ($akunId) {
+            $akun = DaftarAkun::find($akunId);
+        }
+
+        $pdf = Pdf::loadView('exports.laporan-buku-besar', [
+            'ledgers' => $ledgers,
+            'periode' => $periode,
+            'akun' => $akun,
+        ])->setPaper('A4', 'portrait');
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            'laporan-buku-besar.pdf'
+        );
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'finance';
     }
 }
+

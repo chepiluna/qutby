@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Sales\Widgets\SalesStats;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -29,7 +30,7 @@ class SalesPanelProvider extends PanelProvider
             ->id('sales')
             ->path('sales')
             ->authGuard('web')
-            ->login()
+            ->login(CustomLogin::class)
             ->navigationGroups([
                 'Master Data',
                 'Transaksi',

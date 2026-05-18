@@ -12,6 +12,7 @@ class PenjualanChart extends ChartWidget
     protected ?string $pollingInterval = null;
     protected static ?int $sort = 3;
     protected int | string | array $columnSpan = 'full';
+    protected ?string $maxHeight = '260px';
 
     protected function getData(): array
     {
@@ -22,28 +23,85 @@ class PenjualanChart extends ChartWidget
             ->whereDate('tanggal_faktur', '>=', $start)
             ->groupBy('tgl')
             ->orderBy('tgl')
-            ->get();
+            ->pluck('nilai', 'tgl');
 
-        $labels = $rows->pluck('tgl')->map(fn ($d) => Carbon::parse($d)->format('d M'))->toArray();
-        $data   = $rows->pluck('nilai')->map(fn ($v) => (float) $v)->toArray();
+        $dates = collect(range(0, 29))->map(fn ($day) => $start->copy()->addDays($day));
+        $data = $dates
+            ->map(fn (Carbon $date) => (float) ($rows[$date->toDateString()] ?? 0))
+            ->toArray();
+        $labels = $dates
+            ->map(fn (Carbon $date) => $date->format('j M'))
+            ->toArray();
+        $colors = array_fill(0, 30, '#F29A82');
+        $colors[29] = '#C91F26';
 
         return [
             'datasets' => [
                 [
                     'label' => 'Penjualan',
                     'data' => $data,
-                    'borderColor' => '#920004',
-                    'backgroundColor' => 'rgba(146,0,4,0.15)',
-                    'fill' => true,
-                    'tension' => 0.35,
+                    'backgroundColor' => $colors,
+                    'borderColor' => $colors,
+                    'borderRadius' => 3,
+                    'borderSkipped' => false,
+                    'barPercentage' => 0.72,
+                    'categoryPercentage' => 0.72,
                 ],
             ],
             'labels' => $labels,
         ];
     }
 
+    protected function getOptions(): array
+    {
+        return [
+            'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => [
+                    'display' => false,
+                ],
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
+            'scales' => [
+                'x' => [
+                    'grid' => [
+                        'display' => false,
+                    ],
+                    'ticks' => [
+                        'color' => '#111827',
+                        'font' => [
+                            'size' => 11,
+                            'weight' => '600',
+                        ],
+                        'maxRotation' => 0,
+                        'autoSkip' => true,
+                        'maxTicksLimit' => 8,
+                        'padding' => 8,
+                    ],
+                    'border' => [
+                        'display' => false,
+                    ],
+                ],
+                'y' => [
+                    'beginAtZero' => true,
+                    'grid' => [
+                        'color' => 'rgba(15, 23, 42, 0.10)',
+                    ],
+                    'ticks' => [
+                        'display' => false,
+                    ],
+                    'border' => [
+                        'display' => false,
+                    ],
+                ],
+            ],
+        ];
+    }
+
     protected function getType(): string
     {
-        return 'line';
+        return 'bar';
     }
 }

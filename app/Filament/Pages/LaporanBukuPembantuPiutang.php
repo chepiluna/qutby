@@ -10,6 +10,7 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use UnitEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Facades\Filament;
 
 // 🔥 PAKAI SCHEMA (BUKAN FORM)
 use Filament\Schemas\Components\Section;
@@ -245,5 +246,10 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
             fn () => print($pdf->output()),
             'buku-pembantu-piutang.pdf'
         );
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Filament::getCurrentPanel()?->getId() === 'finance';
     }
 }

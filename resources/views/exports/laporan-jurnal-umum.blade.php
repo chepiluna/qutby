@@ -19,7 +19,6 @@
             text-align: right;
         }
 
-        /* KETERANGAN KREDIT → AGAK KE TENGAH */
         .kredit-indent {
             padding-left: 30px;
             text-align: center;
@@ -52,7 +51,7 @@
         }
 
         th {
-            background-color: #8B0000; /* merah tua */
+            background-color: #8B0000;
             color: #ffffff;
             border: 1px solid #000;
             padding: 6px;
@@ -73,7 +72,7 @@
 </head>
 <body>
 
-    {{-- HEADER LAPORAN (KHUSUS PDF) --}}
+    {{-- HEADER LAPORAN --}}
     <div class="header text-center">
         <h1>LAPORAN JURNAL UMUM</h1>
         <h2>QUTBY COLLECTION</h2>
@@ -92,12 +91,14 @@
         </thead>
 
         <tbody>
+
             @php
                 $totalDebit = 0;
                 $totalKredit = 0;
             @endphp
 
-            @foreach ($rows as $row)
+            @forelse ($rows as $row)
+
                 @php
                     if ($row->posisi === 'debit') {
                         $totalDebit += $row->nominal;
@@ -107,17 +108,20 @@
                 @endphp
 
                 <tr>
+
+                    {{-- TANGGAL --}}
                     <td class="text-center">
                         {{ \Carbon\Carbon::parse($row->jurnalUmum->tanggal)->format('d-m-Y') }}
-                    </td>
-
-                    <td class="text-center">
-                        {{ $row->akun->kode_akun }}
                     </td>
 
                     {{-- KETERANGAN --}}
                     <td class="{{ $row->posisi === 'kredit' ? 'kredit-indent' : '' }}">
                         {{ $row->akun->nama_akun }}
+                    </td>
+
+                    {{-- NO AKUN --}}
+                    <td class="text-center">
+                        {{ $row->akun->kode_akun }}
                     </td>
 
                     {{-- DEBIT --}}
@@ -133,19 +137,34 @@
                             Rp {{ number_format($row->nominal, 0, ',', '.') }}
                         @endif
                     </td>
+
                 </tr>
-            @endforeach
+
+            @empty
+
+                <tr>
+                    <td colspan="5" class="text-center">
+                        Data tidak ditemukan
+                    </td>
+                </tr>
+
+            @endforelse
 
             {{-- TOTAL --}}
             <tr class="total-row">
-                <td colspan="3" class="text-center">TOTAL</td>
+                <td colspan="3" class="text-center">
+                    TOTAL
+                </td>
+
                 <td class="text-right">
                     Rp {{ number_format($totalDebit, 0, ',', '.') }}
                 </td>
+
                 <td class="text-right">
                     Rp {{ number_format($totalKredit, 0, ',', '.') }}
                 </td>
             </tr>
+
         </tbody>
     </table>
 

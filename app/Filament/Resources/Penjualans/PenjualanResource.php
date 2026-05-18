@@ -53,7 +53,9 @@ public static function form(Schema $schema): Schema
                     DatePicker::make('tanggal_faktur')
                         ->label('Tanggal faktur')
                         ->required()
-                        ->default(now()),
+                        ->default(now())
+                        ->minDate(now()->startOfMonth())
+                        ->maxDate(now()),
 
                     TextInput::make('no_faktur')
                         ->label('No. Faktur')
@@ -73,7 +75,6 @@ public static function form(Schema $schema): Schema
                         ->relationship('pelanggan', 'nama_pelanggan')
                         ->searchable()
                         ->preload()
-                        ->placeholder('Kosongkan jika tunai')
                         ->nullable()
                         ->reactive()
                         ->required(fn (Get $get) => $get('cara_bayar') === 'kredit'),

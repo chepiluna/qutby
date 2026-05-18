@@ -65,6 +65,8 @@ class PembayaranForm
                         ->label('Tanggal Bayar')
                         ->required()
                         ->default(now())
+                        ->minDate(now()->startOfMonth())
+                        ->maxDate(now())
                         ->live()
                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                             self::loadPiutangData($get('piutang_id'), $set, $get);

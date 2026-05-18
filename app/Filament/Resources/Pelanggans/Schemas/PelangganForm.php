@@ -43,7 +43,6 @@ class PelangganForm
                         ->minLength(11)
                         ->regex('/^(62|0)8[1-9][0-9]{6,9}$/')
                         ->helperText('Contoh: 081234567890')
-                        ->required()
                         ->suffixAction(fn (?string $state) => Action::make('chatWhatsapp')
                             ->label('Chat WA')
                             ->icon('heroicon-m-chat-bubble-left-right')

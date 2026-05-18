@@ -9,15 +9,40 @@
             QUTBY COLLECTION
         </h2>
 
+        @php
+            $namaBulan = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+        @endphp
+
         <p class="text-sm text-gray-600">
-            @if ($this->from && $this->until)
+            @if ($this->bulan && $this->tahun)
                 Periode
-                {{ \Carbon\Carbon::parse($this->from)->translatedFormat('F Y') }}
+                {{ $namaBulan[$this->bulan] }}
+                {{ $this->tahun }}
+            @elseif ($this->tahun)
+                Tahun {{ $this->tahun }}
             @else
                 Semua Periode
             @endif
         </p>
     </div>
+
+    {{-- FORM FILTER --}}
+    {{ $this->form }}
+
+    <br>
 
     {{-- TABEL FILAMENT --}}
     {{ $this->table }}

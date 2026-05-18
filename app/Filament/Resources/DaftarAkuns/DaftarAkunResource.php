@@ -50,7 +50,7 @@ class DaftarAkunResource extends Resource
         return [
             'index'  => ListDaftarAkuns::route('/'),
             'create' => CreateDaftarAkun::route('/create'),
-            'edit'   => EditDaftarAkun::route('/{record}/edit'),
+            //'edit'   => EditDaftarAkun::route('/{record}/edit'),
             'view'   => ViewDaftarAkun::route('/{record}'),
         ];
     }

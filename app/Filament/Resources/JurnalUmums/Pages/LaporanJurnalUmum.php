@@ -3,7 +3,10 @@
 namespace App\Filament\Resources\JurnalUmums\Pages;
 
 use App\Filament\Resources\JurnalUmums\JurnalUmumResource;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Schemas\Schema;
 use Filament\Resources\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Summarizer;
@@ -13,82 +16,142 @@ use Filament\Tables\Table;
 use App\Models\JurnalUmumDetail;
 use Illuminate\Database\Eloquent\Builder;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Facades\Filament;
 
-
-class LaporanJurnalUmum extends Page implements HasTable
+class LaporanJurnalUmum extends Page implements HasTable, HasForms
 {
     use InteractsWithTable;
+    use InteractsWithForms;
 
     protected static string $resource = JurnalUmumResource::class;
+
     protected static ?string $navigationLabel = 'Laporan Jurnal Umum';
+
     protected string $view = 'filament.resources.jurnal-umums.pages.laporan-jurnal-umum';
 
-    public ?string $from = null;
-    public ?string $until = null;
+    public ?string $bulan = null;
+    public ?string $tahun = null;
 
-    public function exportPdf()
-{
-    $periodeState = $this->getTableFilterState('periode') ?? []; // ambil state filter [web:121]
-    $from  = $periodeState['from']  ?? null;
-    $until = $periodeState['until'] ?? null;
-
-    $rows = JurnalUmumDetail::query()
-        ->with(['jurnalUmum', 'akun'])
-        ->when($from, fn ($q) =>
-            $q->whereHas('jurnalUmum', fn ($qq) =>
-                $qq->whereDate('tanggal', '>=', $from)
-            )
-        )
-        ->when($until, fn ($q) =>
-            $q->whereHas('jurnalUmum', fn ($qq) =>
-                $qq->whereDate('tanggal', '<=', $until)
-            )
-        )
-        ->orderBy('jurnal_umum_id')
-        ->get();
-
-    $periode = 'Semua Periode';
-    if ($from && $until) {
-        $periode = Carbon::parse($from)->translatedFormat('d F Y')
-            . ' s/d ' .
-            Carbon::parse($until)->translatedFormat('d F Y');
-    } elseif ($from) {
-        $periode = 'Mulai ' . Carbon::parse($from)->translatedFormat('d F Y');
-    } elseif ($until) {
-        $periode = 'Sampai ' . Carbon::parse($until)->translatedFormat('d F Y');
+    public function mount(): void
+    {
+        $this->form->fill();
     }
 
-    $pdf = Pdf::loadView('exports.laporan-jurnal-umum', [
-        'rows' => $rows,
-        'periode' => $periode,
-    ])->setPaper('A4', 'portrait');
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
 
-    return response()->streamDownload(
-        fn () => print($pdf->output()),
-        'laporan-jurnal-umum.pdf'
-    );
-}
+                \Filament\Schemas\Components\Grid::make(2)
+                    ->schema([
+
+                        Forms\Components\Select::make('bulan')
+                            ->label('Bulan')
+                            ->live()
+                            ->options([
+                                '1' => 'Januari',
+                                '2' => 'Februari',
+                                '3' => 'Maret',
+                                '4' => 'April',
+                                '5' => 'Mei',
+                                '6' => 'Juni',
+                                '7' => 'Juli',
+                                '8' => 'Agustus',
+                                '9' => 'September',
+                                '10' => 'Oktober',
+                                '11' => 'November',
+                                '12' => 'Desember',
+                            ]),
+
+                        Forms\Components\Select::make('tahun')
+                            ->label('Tahun')
+                            ->live()
+                            ->options([
+                                '2024' => '2024',
+                                '2025' => '2025',
+                                '2026' => '2026',
+                            ]),
+                    ]),
+            ])
+            ->statePath('');
+    }
+
+    public function exportPdf()
+    {
+        $rows = JurnalUmumDetail::query()
+            ->with(['jurnalUmum', 'akun'])
+
+            ->when($this->bulan, fn ($q) =>
+                $q->whereHas('jurnalUmum', fn ($qq) =>
+                    $qq->whereMonth('tanggal', $this->bulan)
+                )
+            )
+
+            ->when($this->tahun, fn ($q) =>
+                $q->whereHas('jurnalUmum', fn ($qq) =>
+                    $qq->whereYear('tanggal', $this->tahun)
+                )
+            )
+
+            ->orderBy('jurnal_umum_id')
+            ->get();
+
+        $namaBulan = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        $periode = 'Semua Periode';
+
+        if ($this->bulan && $this->tahun) {
+            $periode = $namaBulan[$this->bulan] . ' ' . $this->tahun;
+        }
+
+        $pdf = Pdf::loadView('exports.laporan-jurnal-umum', [
+            'rows' => $rows,
+            'periode' => $periode,
+        ])->setPaper('A4', 'portrait');
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            'laporan-jurnal-umum.pdf'
+        );
+    }
+
     public function table(Table $table): Table
     {
         return $table
             ->query(function (): Builder {
+
                 return JurnalUmumDetail::query()
                     ->with(['jurnalUmum', 'akun'])
-                    ->when($this->from, fn (Builder $query) =>
-                        $query->whereHas('jurnalUmum', fn (Builder $q) =>
-                            $q->whereDate('tanggal', '>=', $this->from)
+
+                    ->when($this->bulan, fn ($q) =>
+                        $q->whereHas('jurnalUmum', fn ($qq) =>
+                            $qq->whereMonth('tanggal', $this->bulan)
                         )
                     )
-                    ->when($this->until, fn (Builder $query) =>
-                        $query->whereHas('jurnalUmum', fn (Builder $q) =>
-                            $q->whereDate('tanggal', '<=', $this->until)
+
+                    ->when($this->tahun, fn ($q) =>
+                        $q->whereHas('jurnalUmum', fn ($qq) =>
+                            $qq->whereYear('tanggal', $this->tahun)
                         )
                     );
             })
+
             ->columns([
+
                 Tables\Columns\TextColumn::make('jurnalUmum.tanggal')
                     ->label('Tanggal')
                     ->date('d-M-y'),
@@ -99,11 +162,10 @@ class LaporanJurnalUmum extends Page implements HasTable
                     ->extraCellAttributes(fn ($record) => [
                         'class' => $record->posisi === 'kredit' ? 'ps-8' : '',
                     ]),
-                
+
                 Tables\Columns\TextColumn::make('akun.kode_akun')
                     ->label('No Akun'),
 
-                // ===== DEBIT =====
                 Tables\Columns\TextColumn::make('debit')
                     ->label('Debit')
                     ->alignEnd()
@@ -124,7 +186,6 @@ class LaporanJurnalUmum extends Page implements HasTable
                             ->label('Total Debit')
                     ),
 
-                // ===== KREDIT =====
                 Tables\Columns\TextColumn::make('kredit')
                     ->label('Kredit')
                     ->alignEnd()
@@ -145,53 +206,21 @@ class LaporanJurnalUmum extends Page implements HasTable
                             ->label('Total Kredit')
                     ),
             ])
-            ->filters([
-                Tables\Filters\Filter::make('periode')
-                    ->form([
-                        DatePicker::make('from')->label('Dari tanggal'),
-                        DatePicker::make('until')->label('Sampai tanggal'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when($data['from'] ?? null, fn (Builder $q, $date) =>
-                                $q->whereHas('jurnalUmum', fn (Builder $qq) =>
-                                    $qq->whereDate('tanggal', '>=', $date)
-                                )
-                            )
-                            ->when($data['until'] ?? null, fn (Builder $q, $date) =>
-                                $q->whereHas('jurnalUmum', fn (Builder $qq) =>
-                                    $qq->whereDate('tanggal', '<=', $date)
-                                )
-                            );
-                    })
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
 
-                        if ($data['from'] ?? null) {
-                            $indicators[] = 'Dari: ' . $data['from'];
-                        }
-
-                        if ($data['until'] ?? null) {
-                            $indicators[] = 'Sampai: ' . $data['until'];
-                        }
-
-                        return $indicators;
-                    }),
-            ])
-            
-           ->headerActions([
+            ->headerActions([
                 Actions\Action::make('export_pdf')
                     ->label('Export PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('danger')
                     ->action(fn () => $this->exportPdf()),
             ])
+
             ->actions([])
             ->bulkActions([]);
     }
 
     public static function shouldRegisterNavigation(array $parameters = []): bool
-{
-    return Filament::getCurrentPanel()?->getId() === 'finance';
-}
+    {
+        return Filament::getCurrentPanel()?->getId() === 'finance';
+    }
 }
