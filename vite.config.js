@@ -11,6 +11,7 @@ export default defineConfig({
 
         // Filament Finance theme:
         'resources/css/filament/finance/theme.css',
+        'resources/css/filament/sales/theme.css',
       ],
       refresh: true,
     }),

@@ -134,34 +134,41 @@
 
 /* base */
 .fi-wi-stats-overview .stat-card{
-  border-radius: 0.75rem !important;
+  border-radius: 0.5rem !important;
   border: 1px solid rgba(0,0,0,.08) !important;
-
-  /* TIMBUL */
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,.12),
-              0 8px 10px -6px rgba(0,0,0,.10) !important;
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.10) !important;
+  min-height: 112px !important;
+  padding: 0.75rem !important;
   transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
 }
 
 /* hover biar makin timbul */
 .fi-wi-stats-overview .stat-card:hover{
-  transform: translateY(-4px);
-  box-shadow: 0 25px 50px -12px rgba(0,0,0,.25) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.16) !important;
   filter: saturate(1.05);
 }
 
 
 /* gradient backgrounds */
 .fi-wi-stats-overview .stat-card--success{
-  background: linear-gradient(135deg, #d1d2fa 0%, #f3b9a7 45%, #e7946e 100%) !important;
+  background: #FDEBE5 !important;
 }
 
 .fi-wi-stats-overview .stat-card--warning{
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 45%, #fbbf24 100%) !important;
+  background: #FEF3D8 !important;
 }
 
 .fi-wi-stats-overview .stat-card--info{
-  background: linear-gradient(135deg, #dbeafe 0%, #bfc8fe 45%, #bc93fd 100%) !important;
+  background: #EEEAFF !important;
+}
+
+.fi-wi-stats-overview .stat-card--cash{
+  background: #EAF3DE !important;
+}
+
+.fi-wi-stats-overview .stat-card--credit{
+  background: #E6F1FB !important;
 }
 
 
@@ -171,17 +178,262 @@
   color: #111827 !important;
 }
 
+.fi-wi-stats-overview .stat-card--success,
+.fi-wi-stats-overview .stat-card--success *{
+  color: #9A3412 !important;
+}
+
+.fi-wi-stats-overview .stat-card--warning,
+.fi-wi-stats-overview .stat-card--warning *{
+  color: #92400E !important;
+}
+
+.fi-wi-stats-overview .stat-card--info,
+.fi-wi-stats-overview .stat-card--info *{
+  color: #4338CA !important;
+}
+
+.fi-wi-stats-overview .stat-card--cash,
+.fi-wi-stats-overview .stat-card--cash *{
+  color: #24551f !important;
+}
+
+.fi-wi-stats-overview .stat-card--credit,
+.fi-wi-stats-overview .stat-card--credit *{
+  color: #14558f !important;
+}
+
 
 /* icon juga ikut hitam */
 .fi-wi-stats-overview .stat-card svg{
   color: #111827 !important;
 }
 
+.fi-wi-stats-overview .stat-card--cash svg{
+  color: #2f6a28 !important;
+}
 
-/* optional: biar angka lebih tegas */
-.fi-wi-stats-overview .stat-card .fi-wi-stats-overview-stat-value{
-  font-weight: 800 !important;
+.fi-wi-stats-overview .stat-card--credit svg{
+  color: #1f6ead !important;
 }
 
 
+/* optional: biar angka lebih tegas */
+.fi-wi-stats-overview .stat-card .fi-wi-stats-overview-stat-value{
+  font-size: 1.3rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+}
 
+.fi-wi-stats-overview .stat-card .fi-wi-stats-overview-stat-label{
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+}
+
+.fi-wi-stats-overview .stat-card .fi-wi-stats-overview-stat-description{
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+.fi-wi-stats-overview .stat-card .fi-wi-stats-overview-stat-content{
+  gap: 0.35rem !important;
+}
+
+.fi-wi-chart .fi-section {
+  border: 1px solid #d5d9df !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+}
+
+.fi-wi-chart .fi-section-header {
+  padding-bottom: 0.25rem !important;
+}
+
+.fi-wi-chart .fi-section-heading {
+  color: #111827 !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+}
+
+.fi-wi-chart .fi-wi-chart-canvas-ctn {
+  min-height: 260px !important;
+}
+
+.sales-dashboard-split {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.78fr) 260px;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.sales-dashboard-card {
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: 0.5rem;
+  background: #ffffff;
+  min-height: 205px;
+  padding: 1.125rem;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.sales-dashboard-card__header {
+  margin-bottom: 0.75rem;
+}
+
+.sales-dashboard-card__header h2 {
+  color: #111827;
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.sales-top-table-wrap {
+  overflow-x: auto;
+}
+
+.sales-top-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.sales-top-table th {
+  border-bottom: 1px solid rgba(146, 0, 4, 0.25);
+  color: var(--fin-maroon);
+  font-weight: 800;
+  padding: 0.45rem 0.35rem;
+  text-align: left;
+}
+
+.sales-top-table td {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+  color: #111827;
+  padding: 0.5rem 0.35rem;
+  white-space: nowrap;
+}
+
+.sales-top-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.sales-top-table__number {
+  text-align: right !important;
+}
+
+.sales-top-table__empty {
+  color: #64748b !important;
+  text-align: center;
+}
+
+.sales-dashboard-card--donut {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sales-donut {
+  position: relative;
+  width: 138px;
+  height: 138px;
+  margin: 0 auto 0.875rem;
+}
+
+.sales-donut svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.sales-donut circle {
+  fill: none;
+  stroke-width: 16;
+  stroke-linecap: butt;
+}
+
+.sales-donut__track {
+  stroke: #eef2f7;
+}
+
+.sales-donut__cash {
+  stroke: #BFE2FF;
+  stroke-dasharray: calc(var(--tunai) * 2.63894) 263.894;
+}
+
+.sales-donut__credit {
+  stroke: #1F6EAD;
+  stroke-dasharray: calc(var(--kredit) * 2.63894) 263.894;
+  stroke-dashoffset: calc(var(--tunai) * -2.63894);
+}
+
+.sales-donut__label {
+  align-items: center;
+  background: #ffffff;
+  border-radius: 999px;
+  color: #1f6ead;
+  display: flex;
+  flex-direction: column;
+  height: 58px;
+  justify-content: center;
+  left: 50%;
+  line-height: 1.05;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 58px;
+}
+
+.sales-donut__label strong {
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.sales-donut__label span {
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.sales-donut-legend {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+}
+
+.sales-donut-legend__item {
+  align-items: center;
+  color: #111827;
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: auto auto 1fr;
+  white-space: nowrap;
+}
+
+.sales-donut-legend__item strong {
+  font-weight: 800;
+  text-align: right;
+}
+
+.sales-donut-legend__dot {
+  border-radius: 999px;
+  display: inline-block;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.sales-donut-legend__dot--credit {
+  background: #1F6EAD;
+}
+
+.sales-donut-legend__dot--cash {
+  background: #BFE2FF;
+}
+
+@media (max-width: 768px) {
+  .sales-dashboard-split {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sales-dashboard-card--donut {
+    min-height: 260px;
+  }
+}

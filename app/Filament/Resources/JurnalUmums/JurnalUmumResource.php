@@ -51,14 +51,14 @@ class JurnalUmumResource extends Resource
     }
     
     public static function getPages(): array
-{
-    return [
-        'index'   => Pages\ListJurnalUmums::route('/'),
-        'create'  => Pages\CreateJurnalUmum::route('/create'),
-        //'edit'    => Pages\EditJurnalUmum::route('/{record}/edit'),
-        'laporan' => Pages\LaporanJurnalUmum::route('/laporan'),
-        'view'   => Pages\ViewJurnalUmum::route('/{record}'),
-    ];
+    {
+        return [
+            'index'   => Pages\ListJurnalUmums::route('/'),
+            //'create'  => Pages\CreateJurnalUmum::route('/create'),
+            //'edit'    => Pages\EditJurnalUmum::route('/{record}/edit'),
+            'laporan' => Pages\LaporanJurnalUmum::route('/laporan'),
+            'view'   => Pages\ViewJurnalUmum::route('/{record}'),
+        ];
     }
     
     public static function shouldRegisterNavigation(): bool

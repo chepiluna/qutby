@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Pelanggan;
 use App\Models\Piutang;
 use BackedEnum;
 use Filament\Facades\Filament;
@@ -34,7 +33,7 @@ class LaporanPiutangPelanggan extends Page implements HasForms
     public function mount(): void
     {
         $this->form->fill([
-            'pelanggan_id' => null,
+            'status' => 'semua',
             'bulan' => now()->month,
             'tahun' => now()->year,
         ]);
@@ -44,15 +43,19 @@ class LaporanPiutangPelanggan extends Page implements HasForms
     {
         return $schema
             ->components([
-                Select::make('pelanggan_id')
-                    ->label('Nama Pelanggan')
-                    ->options(
-                        Pelanggan::query()->pluck('nama_pelanggan', 'id')
-                    )
-                    ->searchable()
-                    ->preload()
+
+                // ✅ FILTER STATUS
+                Select::make('status')
+                    ->label('Status Piutang')
+                    ->options([
+                        'semua' => 'Semua',
+                        'lunas' => 'Lunas',
+                        'belum_lunas' => 'Belum Lunas',
+                    ])
+                    ->required()
                     ->live(),
 
+                // ✅ FILTER BULAN
                 Select::make('bulan')
                     ->label('Bulan')
                     ->options([
@@ -72,6 +75,7 @@ class LaporanPiutangPelanggan extends Page implements HasForms
                     ->required()
                     ->live(),
 
+                // ✅ FILTER TAHUN
                 Select::make('tahun')
                     ->label('Tahun')
                     ->options(
@@ -88,21 +92,28 @@ class LaporanPiutangPelanggan extends Page implements HasForms
 
     public function getPiutangsProperty(): Collection
     {
-        $pelangganId = data_get($this->data, 'pelanggan_id');
+        $status = data_get($this->data, 'status');
         $bulan = data_get($this->data, 'bulan');
         $tahun = data_get($this->data, 'tahun');
 
         return Piutang::query()
             ->with('pelanggan')
-            ->when($pelangganId, function ($query) use ($pelangganId) {
-                $query->where('pelanggan_id', $pelangganId);
+
+            // ✅ FILTER STATUS
+            ->when($status && $status !== 'semua', function ($query) use ($status) {
+                $query->where('status', $status);
             })
+
+            // ✅ FILTER BULAN
             ->when($bulan, function ($query) use ($bulan) {
                 $query->whereMonth('tanggal_faktur', $bulan);
             })
+
+            // ✅ FILTER TAHUN
             ->when($tahun, function ($query) use ($tahun) {
                 $query->whereYear('tanggal_faktur', $tahun);
             })
+
             ->orderBy('tanggal_faktur', 'desc')
             ->orderBy('id', 'desc')
             ->get();

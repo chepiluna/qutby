@@ -43,13 +43,6 @@ class PelangganResource extends Resource
         return PelanggansTable::configure($table);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            PiutangRelationManager::class,
-        ];
-    }
-
     public static function getPages(): array
     {
         return [

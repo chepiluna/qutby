@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Finance\Widgets\Cashflow30DaysChart;
 use App\Filament\Finance\Widgets\FinanceStats;
 use Filament\Http\Middleware\Authenticate;
@@ -29,7 +30,7 @@ class FinancePanelProvider extends PanelProvider
             ->id('finance')
             ->path('finance')
             ->authGuard('web')
-            ->login()
+            ->login(CustomLogin::class)
             ->navigationGroups([
                 'Master Data',
                 'Transaksi',

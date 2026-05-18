@@ -13,16 +13,26 @@
 
 <x-filament::page>
     {{-- HEADER --}}
-    <div class="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <div class="mx-auto w-max text-center">
+    <div class="mb-0 relative rounded-xl border border-gray-200 bg-white p-6">
+        <div class="absolute right-4 top-4">
+            <button wire:click="exportPdf" type="button" wire:loading.attr="disabled" wire:target="exportPdf"
+                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-70">
+                Export PDF
+            </button>
+        </div>
+        <div class="text-center">
             <div class="text-lg font-bold tracking-wide">LAPORAN BUKU BESAR</div>
             <div class="text-sm font-semibold">CV QUTBY COLLECTION</div>
             <div class="text-sm text-gray-600">PERIODE: {{ $periodeText }}</div>
         </div>
     </div>
 
-    {{-- FILTER --}}
-    <div class="mb-6">
+    <div class="mb-0 rounded-xl border border-gray-200 bg-white p-4">
+        <div class="mb-3">
+            <div class="text-lg font-semibold">Filter</div>
+            <div class="text-sm text-gray-500">Gunakan filter untuk memilih akun, bulan, dan tahun.</div>
+        </div>
+
         {{ $this->form }}
         <x-filament-actions::modals />
     </div>

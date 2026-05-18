@@ -63,8 +63,6 @@ class DaftarAkunsTable
             ])
             ->filters([])
             ->recordActions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
                 Actions\ViewAction::make(),
             ])
             ->bulkActions([
