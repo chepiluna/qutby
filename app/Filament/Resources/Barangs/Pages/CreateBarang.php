@@ -22,18 +22,23 @@ class CreateBarang extends CreateRecord
     protected function getCreateFormAction(): Action
     {
         return parent::getCreateFormAction()
-            ->label('Tambah');
+            ->label('Simpan');
     }
 
     protected function getCreateAnotherFormAction(): Action
     {
         return parent::getCreateAnotherFormAction()
-            ->label('Tambah & tambah lainnya');
+            ->hidden();
     }
 
     protected function getCancelFormAction(): Action
     {
         return parent::getCancelFormAction()
             ->label('Batal');
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

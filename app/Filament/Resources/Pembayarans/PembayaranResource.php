@@ -22,7 +22,7 @@ class PembayaranResource extends Resource
 {
     protected static ?string $model = Pembayaran::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCurrencyDollar;
     protected static UnitEnum|string|null $navigationGroup = 'Transaksi';
 
     protected static ?string $navigationLabel = 'Pembayaran';

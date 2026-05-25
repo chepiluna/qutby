@@ -46,12 +46,6 @@ class Penjualan extends Model
         return $this->belongsTo(Pajak::class, 'pajak_id');
     }
 
-    public function hitungTotalHpp(): int
-    {
-        return $this->detail->sum(function ($detail) {
-            return $detail->qty * ($detail->barang->hpp_satuan ?? 0);
-        });
-    }
     public static function generateNextNoFaktur(): string
     {
         $last = static::query()

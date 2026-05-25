@@ -18,7 +18,7 @@ class LaporanPiutangPelanggan extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalculator;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowTrendingDown;
 
     protected static UnitEnum|string|null $navigationGroup = 'Laporan';
 
