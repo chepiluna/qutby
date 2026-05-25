@@ -24,7 +24,7 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowTrendingDown;
     protected static UnitEnum|string|null $navigationGroup = 'Laporan';
     protected static ?string $navigationLabel = 'Buku Pembantu Piutang';
 

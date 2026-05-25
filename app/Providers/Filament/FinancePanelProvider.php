@@ -36,7 +36,8 @@ class FinancePanelProvider extends PanelProvider
                 'Transaksi',
                 'Laporan',
             ])
-            ->brandName('Qutby Creativindo')
+            ->brandName('QUTRIX')
+            ->brandLogo(asset('images/logoqutby.png'))
             ->viteTheme('resources/css/filament/finance/theme.css')
             ->colors([
                 'primary' => Color::Emerald,
@@ -57,9 +58,6 @@ class FinancePanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Finance/Resources'), for: 'App\\Filament\\Finance\\Resources')
             ->discoverPages(in: app_path('Filament/Finance/Pages'), for: 'App\\Filament\\Finance\\Pages')
             ->discoverWidgets(in: app_path('Filament/Finance/Widgets'), for: 'App\\Filament\\Finance\\Widgets')
-            ->pages([
-                Dashboard::class,
-            ])
             ->widgets([
                 FinanceStats::class,
                 Cashflow30DaysChart::class,

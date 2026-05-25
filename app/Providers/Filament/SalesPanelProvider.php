@@ -8,7 +8,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
+use App\Filament\Sales\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -37,7 +37,10 @@ class SalesPanelProvider extends PanelProvider
                 'Laporan',
                 'Pengaturan', 
             ])
-            ->brandName('Qutby Creativindo')
+            
+            ->brandName('QUTRIX')
+            ->brandLogo(asset('images/logoqutby.png'))
+            ->brandLogoHeight('3rem')
             ->viteTheme('resources/css/filament/sales/theme.css')
             ->colors([
                 'primary' => Color::Amber,

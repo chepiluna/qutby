@@ -22,7 +22,6 @@ class BarangResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    // ⬅️ baris INI yang penting: tipenya harus UnitEnum|string|null
     protected static UnitEnum|string|null $navigationGroup = 'Master Data';
 
     protected static ?string $navigationLabel = 'Barang';
@@ -57,7 +56,17 @@ class BarangResource extends Resource
             'view'   => ViewBarang::route('/{record}'),
         ];
     }
-    
+
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'sales';

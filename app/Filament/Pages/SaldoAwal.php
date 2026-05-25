@@ -22,8 +22,8 @@ class SaldoAwal extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalculator;
-    protected static UnitEnum|string|null $navigationGroup = 'Laporan Keuangan';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingLibrary;
+    protected static UnitEnum|string|null $navigationGroup = 'Pengaturan Akuntansi';
     protected static ?string $navigationLabel = 'Saldo Awal';
     protected ?string $heading = 'Saldo Awal';
 
