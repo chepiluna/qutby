@@ -38,6 +38,7 @@ class FinancePanelProvider extends PanelProvider
             ])
             ->brandName('QUTRIX')
             ->brandLogo(asset('images/logoqutby.png'))
+            ->brandLogoHeight('3rem')
             ->viteTheme('resources/css/filament/finance/theme.css')
             ->colors([
                 'primary' => Color::Emerald,
