@@ -209,7 +209,7 @@ class LaporanJurnalUmum extends Page implements HasTable, HasForms
 
             ->headerActions([
                 Actions\Action::make('export_pdf')
-                    ->label('Export PDF')
+                    ->label('Cetak PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('danger')
                     ->action(fn () => $this->exportPdf()),
@@ -221,6 +221,6 @@ class LaporanJurnalUmum extends Page implements HasTable, HasForms
 
     public static function shouldRegisterNavigation(array $parameters = []): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'finance';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'finance'], true);
     }
 }

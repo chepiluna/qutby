@@ -57,6 +57,6 @@ class DaftarAkunResource extends Resource
     
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'finance';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'finance'], true);
     }
 }

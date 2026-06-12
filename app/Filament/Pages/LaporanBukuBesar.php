@@ -49,47 +49,43 @@ class LaporanBukuBesar extends Page implements HasSchemas
     {
         return $schema
             ->components([
-                Section::make('Filter')
-                    ->schema([
-                        Grid::make(3)->schema([
+                Grid::make(3)->schema([
+                    Select::make('akun_id')
+                        ->label('Akun')
+                        ->options(fn () => DaftarAkun::orderBy('kode_akun')->pluck('nama_akun', 'id'))
+                        ->searchable()
+                        ->placeholder('Semua akun')
+                        ->live(),
 
-                            Select::make('akun_id')
-                                ->label('Akun')
-                                ->options(fn () => DaftarAkun::orderBy('kode_akun')->pluck('nama_akun', 'id'))
-                                ->searchable()
-                                ->placeholder('Semua akun')
-                                ->live(),
+                    Select::make('bulan')
+                        ->label('Bulan')
+                        ->options([
+                            '01' => 'Januari',
+                            '02' => 'Februari',
+                            '03' => 'Maret',
+                            '04' => 'April',
+                            '05' => 'Mei',
+                            '06' => 'Juni',
+                            '07' => 'Juli',
+                            '08' => 'Agustus',
+                            '09' => 'September',
+                            '10' => 'Oktober',
+                            '11' => 'November',
+                            '12' => 'Desember',
+                        ])
+                        ->required()
+                        ->live(),
 
-                            Select::make('bulan')
-                                ->label('Bulan')
-                                ->options([
-                                    '01' => 'Januari',
-                                    '02' => 'Februari',
-                                    '03' => 'Maret',
-                                    '04' => 'April',
-                                    '05' => 'Mei',
-                                    '06' => 'Juni',
-                                    '07' => 'Juli',
-                                    '08' => 'Agustus',
-                                    '09' => 'September',
-                                    '10' => 'Oktober',
-                                    '11' => 'November',
-                                    '12' => 'Desember',
-                                ])
-                                ->required()
-                                ->live(),
-
-                            Select::make('tahun')
-                                ->label('Tahun')
-                                ->options([
-                                    '2024' => '2024',
-                                    '2025' => '2025',
-                                    '2026' => '2026',
-                                ])
-                                ->required()
-                                ->live(),
-                        ]),
-                    ]),
+                    Select::make('tahun')
+                        ->label('Tahun')
+                        ->options([
+                            '2024' => '2024',
+                            '2025' => '2025',
+                            '2026' => '2026',
+                        ])
+                        ->required()
+                        ->live(),
+                ]),
             ])
             ->statePath('data');
     }
@@ -145,7 +141,6 @@ class LaporanBukuBesar extends Page implements HasSchemas
                 ? $from->copy()->startOfYear()
                 : null;
 
-            // 🔥 MUTASI SEBELUM BULAN (INI JADI SALDO AWAL)
             $debitBefore = JurnalUmumDetail::query()
                 ->where('daftar_akun_id', $akun->id)
                 ->whereHas('jurnalUmum', function ($q) use ($from, $startForBefore) {
@@ -174,7 +169,6 @@ class LaporanBukuBesar extends Page implements HasSchemas
                 ? ($debitBefore - $kreditBefore)
                 : ($kreditBefore - $debitBefore);
 
-            // 🔥 TRANSAKSI DALAM BULAN
             $rows = JurnalUmumDetail::query()
                 ->with(['jurnalUmum'])
                 ->where('daftar_akun_id', $akun->id)
@@ -228,7 +222,7 @@ class LaporanBukuBesar extends Page implements HasSchemas
     {
         return [
             Actions\Action::make('export_pdf')
-                ->label('Export PDF')
+                ->label('Cetak PDF')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('danger')
                 ->action(fn () => $this->exportPdf()),
@@ -285,7 +279,6 @@ class LaporanBukuBesar extends Page implements HasSchemas
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'finance';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'finance'], true);
     }
 }
-

@@ -13,20 +13,21 @@ use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Facades\Filament;
 
 class BarangResource extends Resource
 {
     protected static ?string $model = Barang::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-package';
 
     protected static UnitEnum|string|null $navigationGroup = 'Master Data';
 
     protected static ?string $navigationLabel = 'Barang';
 
     protected static ?string $pluralModelLabel = 'Barang';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'nama_barang';
 
@@ -69,6 +70,6 @@ class BarangResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'sales';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
     }
 }

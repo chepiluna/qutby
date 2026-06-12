@@ -11,6 +11,21 @@ class ListJurnalUmums extends ListRecords
 {
     protected static string $resource = JurnalUmumResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Jurnal Umum';
+    }
+
+    public function getHeading(): string
+    {
+        return 'Jurnal Umum';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Jurnal Umum';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

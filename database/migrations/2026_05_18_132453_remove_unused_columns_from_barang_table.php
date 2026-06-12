@@ -8,14 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('barang', function (Blueprint $table) {
-            $table->dropColumn([
-                'hpp_satuan',
-                'harga_barang',
-                'stok',
-                'foto',
-            ]);
-        });
+        $columns = array_filter([
+            'hpp_satuan',
+            'harga_barang',
+            'stok',
+            'foto',
+        ], fn (string $column): bool => Schema::hasColumn('barang', $column));
+
+        if ($columns !== []) {
+            Schema::table('barang', function (Blueprint $table) use ($columns) {
+                $table->dropColumn($columns);
+            });
+        }
     }
 
     public function down(): void

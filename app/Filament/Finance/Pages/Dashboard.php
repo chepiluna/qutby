@@ -8,5 +8,7 @@ class Dashboard extends BaseDashboard
 {
     protected static ?string $navigationLabel = 'Dashboard';
 
+    protected static string|\BackedEnum|null $navigationIcon = 'tabler-layout-dashboard';
+
     protected static ?string $title = 'Dashboard Finance';
 }

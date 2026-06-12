@@ -14,14 +14,13 @@ use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Filament\Facades\Filament;
 
 class PelangganResource extends Resource
 {
     protected static ?string $model = Pelanggan::class;
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-users';
     protected static UnitEnum|string|null $navigationGroup = 'Master Data';
 
     // Label di sidebar
@@ -29,6 +28,8 @@ class PelangganResource extends Resource
 
     // Label jamak di header/breadcrumb
     protected static ?string $pluralModelLabel = 'Pelanggan';
+
+    protected static ?int $navigationSort = 2;
 
     // Field yang dipakai sebagai judul record
     protected static ?string $recordTitleAttribute = 'nama_pelanggan';
@@ -54,7 +55,7 @@ class PelangganResource extends Resource
     }
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'sales';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
     }
 
 }

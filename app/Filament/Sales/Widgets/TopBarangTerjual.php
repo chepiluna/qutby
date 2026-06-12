@@ -33,6 +33,28 @@ class TopBarangTerjual extends Widget
             ->limit(3)
             ->get();
 
+        $latestStockIds = DB::table('kartu_stok_average')
+            ->select('barang_id', DB::raw('MAX(id) as id'))
+            ->whereNotNull('barang_id')
+            ->groupBy('barang_id');
+
+        $stokMenipis = Barang::query()
+            ->leftJoinSub($latestStockIds, 'latest_stock', function ($join) {
+                $join->on('latest_stock.barang_id', '=', 'barang.id');
+            })
+            ->leftJoin('kartu_stok_average as stok_average', function ($join) {
+                $join->on('stok_average.id', '=', 'latest_stock.id');
+            })
+            ->select([
+                'barang.id',
+                'barang.nama_barang',
+                DB::raw('COALESCE(stok_average.sisa_unit, 0) as stok'),
+            ])
+            ->orderBy('stok')
+            ->orderBy('barang.nama_barang')
+            ->limit(3)
+            ->get();
+
         $tunai = (float) Penjualan::query()
             ->whereMonth('tanggal_faktur', $bulan)
             ->whereYear('tanggal_faktur', $tahun)
@@ -51,6 +73,7 @@ class TopBarangTerjual extends Widget
 
         return [
             'topBarang' => $topBarang,
+            'stokMenipis' => $stokMenipis,
             'tunai' => $tunai,
             'kredit' => $kredit,
             'total' => $total,

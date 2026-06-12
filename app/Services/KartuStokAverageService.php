@@ -281,37 +281,34 @@ class KartuStokAverageService
 
         $rows = [];
 
-        if ($saldoAwal) {
+        $rows[] = [
+            'tanggal' => $tglMulai->format('j-M'),
 
-            $rows[] = [
-                'tanggal' => $tglMulai->format('d/m/Y'),
+            'keterangan' => 'Saldo Awal',
 
-                'keterangan' => 'Saldo Awal',
+            'jenis' => 'awal',
 
-                'jenis' => 'awal',
+            'pembelian' => null,
 
-                'pembelian' => null,
+            'hpp' => null,
 
-                'hpp' => null,
+            'persediaan' => [
+                'qty' => (int) ($saldoAwal?->sisa_unit ?? 0),
 
-                'persediaan' => [
-                    'qty' => (int) $saldoAwal->sisa_unit,
+                'harga' => (float) ($saldoAwal?->harga_rata_rata ?? 0),
 
-                    'harga' => (float) $saldoAwal->harga_rata_rata,
+                'total' => (float) ($saldoAwal?->nilai_persediaan ?? 0),
 
-                    'total' => (float) $saldoAwal->nilai_persediaan,
-
-                    'average_changed' => false,
-                ],
-            ];
-        }
+                'average_changed' => false,
+            ],
+        ];
 
         foreach ($entries as $entry) {
 
             $rows[] = $this->formatRow($entry);
         }
 
-        $last = $entries->last();
+        $last = $entries->last() ?: $saldoAwal;
 
         $totalPembelian = $entries
             ->where('jenis', 'beli')
@@ -388,7 +385,7 @@ class KartuStokAverageService
         return [
             'tanggal' =>
                 Carbon::parse($entry->tanggal)
-                    ->format('d/m/Y'),
+                    ->format('j-M'),
 
             'keterangan' => $entry->keterangan,
 

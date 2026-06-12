@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class Cashflow30DaysChart extends ChartWidget
 {
     protected ?string $heading = 'Cashflow Overview (Last 30 Days)';
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
     protected int | string | array $columnSpan = 1;
 
     // 🔥 kecilin tinggi chart

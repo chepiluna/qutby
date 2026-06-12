@@ -6,7 +6,7 @@
 @endphp
 
 <x-filament-widgets::widget>
-    <div class="sales-dashboard-split" style="display: grid; grid-template-columns: minmax(360px, 0.78fr) 260px; gap: 14px; align-items: stretch;">
+    <div class="sales-dashboard-split" style="display: grid; grid-template-columns: minmax(360px, 1fr) 260px 260px; gap: 14px; align-items: stretch;">
         <section class="sales-dashboard-card sales-dashboard-card--table" style="min-height: 205px; border: 1px solid #d5d9df; border-radius: 8px; background: #fff; padding: 18px;">
             <div class="sales-dashboard-card__header" style="margin-bottom: 10px;">
                 <h2 style="margin: 0; color: #111827; font-size: 14px; font-weight: 800; line-height: 1.2;">Top Barang Terjual</h2>
@@ -67,6 +67,35 @@
                     <span>Tunai</span>
                     <strong style="font-weight: 800; text-align: right;">Rp {{ number_format($tunai, 0, ',', '.') }}</strong>
                 </div>
+            </div>
+        </section>
+
+        <section class="sales-dashboard-card sales-dashboard-card--stock" style="min-height: 205px; border: 1px solid #d5d9df; border-radius: 8px; background: #fff; padding: 18px;">
+            <div class="sales-dashboard-card__header" style="margin-bottom: 10px;">
+                <h2 style="margin: 0; color: #111827; font-size: 14px; font-weight: 800; line-height: 1.2;">Stok Barang Menipis</h2>
+            </div>
+
+            <div class="sales-top-table-wrap" style="overflow-x: auto;">
+                <table class="sales-top-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr>
+                            <th style="border-bottom: 1px solid #e5c0c0; color: #b91c1c; font-weight: 800; padding: 9px 6px; text-align: left;">Barang</th>
+                            <th class="sales-top-table__number" style="border-bottom: 1px solid #e5c0c0; color: #b91c1c; font-weight: 800; padding: 9px 6px; text-align: right;">Stok</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($stokMenipis as $barang)
+                            <tr>
+                                <td style="border-bottom: 1px solid #e5e7eb; color: #111827; padding: 10px 6px; white-space: nowrap;">{{ $barang->nama_barang }}</td>
+                                <td class="sales-top-table__number" style="border-bottom: 1px solid #e5e7eb; color: #111827; padding: 10px 6px; text-align: right; white-space: nowrap;">{{ number_format((int) $barang->stok, 0, ',', '.') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="2" class="sales-top-table__empty" style="color: #64748b; padding: 14px 6px; text-align: center;">Belum ada data barang.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </section>
     </div>

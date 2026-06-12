@@ -10,6 +10,21 @@ class ListDaftarAkuns extends ListRecords
 {
     protected static string $resource = DaftarAkunResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Daftar Akun';
+    }
+
+    public function getHeading(): string
+    {
+        return 'Daftar Akun';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Daftar Akun';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

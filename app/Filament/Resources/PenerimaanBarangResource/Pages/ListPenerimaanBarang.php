@@ -14,6 +14,23 @@ class ListPenerimaanBarang extends ListRecords
         return 'Daftar Penerimaan Barang';
     }
 
+    public function getHeading(): string
+    {
+        return 'Daftar Penerimaan Barang';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Daftar Penerimaan Barang';
+    }
+
+    public function getPageClasses(): array
+    {
+        return [
+            'qutrix-penerimaan-barang-list-page',
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -16,6 +16,7 @@ class Pembelian extends Model
         'tanggal',
         'nomor',
         'vendor_id',
+        'vendor_manual',
         'total',
         'diskon',
         'ppn',

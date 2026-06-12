@@ -60,7 +60,7 @@ class PenerimaanBarang extends Model
 
             if ($existing->isNotEmpty()) {
                 $base = preg_replace('/-T\d+$/', '', (string) $existing->first());
-                $base = preg_replace('/^(GRN|PNR)-/', 'PNB-', $base);
+                $base = preg_replace('/^PNR-/', 'PNB-', $base);
 
                 return $base . '-T' . ($existing->count() + 1);
             }

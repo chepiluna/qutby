@@ -10,11 +10,26 @@ class ListVendors extends ListRecords
 {
     protected static string $resource = VendorResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Daftar Vendor';
+    }
+
+    public function getHeading(): string
+    {
+        return 'Daftar Vendor';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Daftar Vendor';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Tambah Data Vendor'),
+                ->label('Tambah Vendor'),
         ];
     }
 }

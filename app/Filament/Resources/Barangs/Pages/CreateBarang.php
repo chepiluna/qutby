@@ -16,7 +16,7 @@ class CreateBarang extends CreateRecord
 
     public function getBreadcrumb(): string
     {
-        return 'Tambah';
+        return 'Tambah Barang';
     }
 
     protected function getCreateFormAction(): Action

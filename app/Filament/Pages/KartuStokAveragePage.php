@@ -52,7 +52,7 @@ class KartuStokAveragePage extends Page
 
     public function getHeading(): string
     {
-        return 'Laporan Kartu Stok Average';
+        return '';
     }
 
     public function getBreadcrumb(): string
@@ -189,6 +189,6 @@ class KartuStokAveragePage extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'sales';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
     }
 }

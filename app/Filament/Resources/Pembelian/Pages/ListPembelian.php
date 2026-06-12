@@ -11,6 +11,21 @@ class ListPembelian extends ListRecords
 {
     protected static string $resource = PembelianResource::class;
 
+    public function getBreadcrumb(): string
+    {
+        return 'Daftar Pesanan Pembelian';
+    }
+
+    public function getTitle(): string
+    {
+        return 'Daftar Pesanan Pembelian';
+    }
+
+    public function getHeading(): string
+    {
+        return 'Daftar Pesanan Pembelian';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

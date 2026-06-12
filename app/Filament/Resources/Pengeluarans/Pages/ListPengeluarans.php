@@ -10,11 +10,26 @@ class ListPengeluarans extends ListRecords
 {
     protected static string $resource = PengeluaranResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Daftar Pengeluaran';
+    }
+
+    public function getHeading(): string
+    {
+        return 'Daftar Pengeluaran';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Daftar Pengeluaran';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Tambah Pengeluaran'), // ← tambahin ini
+                ->label('Buat Pengeluaran'), // ← tambahin ini
         ];
     }
 }
