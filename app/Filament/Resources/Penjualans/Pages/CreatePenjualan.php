@@ -12,7 +12,9 @@ use App\Models\Penjualan;
 use App\Models\Piutang;
 use App\Services\KartuStokAverageService;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\DB;
 
 class CreatePenjualan extends CreateRecord
@@ -21,26 +23,54 @@ class CreatePenjualan extends CreateRecord
 
     protected static ?string $title = 'Tambah Penjualan';
 
-    protected ?string $heading = 'Tambah Penjualan';
-
     public function getBreadcrumb(): string
     {
         return 'Tambah';
     }
 
-    protected function getCreateFormAction(): Action
+    public function getHeading(): HtmlString
     {
-        return parent::getCreateFormAction()->label('Tambah');
+        $url = e($this->getResource()::getUrl('index'));
+
+        return new HtmlString(<<<HTML
+            <span style="display:inline-flex; align-items:center; gap:12px;">
+                <a href="{$url}" aria-label="Kembali ke daftar penjualan" style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9999px; background:#000000; color:#ffffff; text-decoration:none; line-height:1;">
+                    <span style="font-size:30px; font-weight:800; transform:translate(-1px, -1px);">&lsaquo;</span>
+                </a>
+                <span>Tambah Penjualan</span>
+            </span>
+        HTML);
     }
 
-    protected function getCreateAnotherFormAction(): Action
+    protected function getHeaderActions(): array
     {
-        return parent::getCreateAnotherFormAction()->label('Tambah & tambah lainnya');
+        return [];
     }
 
-    protected function getCancelFormAction(): Action
+    protected function getFormActions(): array
     {
-        return parent::getCancelFormAction()->label('Batal');
+        return [
+            Action::make('save')
+                ->label('Simpan')
+                ->submit('create'),
+
+            Action::make('cancel')
+                ->label('Batal')
+                ->color('gray')
+                ->url($this->getResource()::getUrl('index')),
+        ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title('Data penjualan telah disimpan');
     }
 
     protected function afterFill(): void

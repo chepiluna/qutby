@@ -16,159 +16,178 @@
             : '-';
     @endphp
 
+    <style>
+        .kartu-stok-average-table {
+            border-collapse: collapse;
+            border: 2px solid #111827;
+        }
+
+        .kartu-stok-average-table th,
+        .kartu-stok-average-table td {
+            border: 1px solid #111827;
+        }
+
+        .kartu-stok-average-table thead th {
+            color: #000000;
+            font-weight: 800;
+            text-transform: none;
+        }
+
+        .dark .kartu-stok-average-table,
+        .dark .kartu-stok-average-table th,
+        .dark .kartu-stok-average-table td {
+            border-color: #111827;
+        }
+    </style>
+
     <div class="space-y-6">
 
         {{-- HEADER --}}
-        <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-sm overflow-hidden">
-
-            <div class="px-6 py-8 text-center">
-
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+        <div class="mb-16 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+            <div class="mx-auto w-max text-center">
+                <div class="text-lg font-bold tracking-wide text-gray-900 dark:text-white">
                     LAPORAN KARTU STOK AVERAGE
-                </h1>
+                </div>
 
-                <div class="mt-1 text-lg font-semibold text-gray-700 dark:text-gray-300">
+                <div class="text-sm font-semibold text-gray-900 dark:text-gray-200">
                     CV QUTBY COLLECTION
                 </div>
 
-                <div class="mt-2 text-sm text-gray-500">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
                     PERIODE: {{ $this->getPeriodeLabel() }}
                 </div>
-
             </div>
+        </div>
 
-            {{-- FILTER --}}
-            <div class="px-6 py-6">
+        {{-- FILTER --}}
+        <div class="mb-6">
 
-                <div style="
-                    display:grid;
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
-                    gap:24px;
-                ">
+            <div style="
+                display:grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap:24px;
+            ">
 
-                    {{-- BULAN --}}
-                    <div>
-                        <label style="
-                            display:block;
-                            margin-bottom:8px;
+                {{-- BULAN --}}
+                <div>
+                    <label style="
+                        display:block;
+                        margin-bottom:8px;
+                        font-size:14px;
+                        font-weight:600;
+                        color:#374151;
+                    ">
+                        Bulan
+                    </label>
+
+                    <select
+                        wire:model.live="bulan"
+                        style="
+                            width:100%;
+                            height:46px;
+                            border:1px solid #d1d5db;
+                            border-radius:12px;
+                            padding:0 14px;
+                            background:#fff;
                             font-size:14px;
-                            font-weight:600;
-                            color:#374151;
-                        ">
-                            Bulan
-                        </label>
+                        "
+                    >
+                        @foreach([
+                            '01'=>'Januari',
+                            '02'=>'Februari',
+                            '03'=>'Maret',
+                            '04'=>'April',
+                            '05'=>'Mei',
+                            '06'=>'Juni',
+                            '07'=>'Juli',
+                            '08'=>'Agustus',
+                            '09'=>'September',
+                            '10'=>'Oktober',
+                            '11'=>'November',
+                            '12'=>'Desember'
+                        ] as $v => $l)
 
-                        <select
-                            wire:model.live="bulan"
-                            style="
-                                width:100%;
-                                height:46px;
-                                border:1px solid #d1d5db;
-                                border-radius:12px;
-                                padding:0 14px;
-                                background:#fff;
-                                font-size:14px;
-                            "
-                        >
-                            @foreach([
-                                '01'=>'Januari',
-                                '02'=>'Februari',
-                                '03'=>'Maret',
-                                '04'=>'April',
-                                '05'=>'Mei',
-                                '06'=>'Juni',
-                                '07'=>'Juli',
-                                '08'=>'Agustus',
-                                '09'=>'September',
-                                '10'=>'Oktober',
-                                '11'=>'November',
-                                '12'=>'Desember'
-                            ] as $v => $l)
-
-                                <option value="{{ $v }}">
-                                    {{ $l }}
-                                </option>
-
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- TAHUN --}}
-                    <div>
-                        <label style="
-                            display:block;
-                            margin-bottom:8px;
-                            font-size:14px;
-                            font-weight:600;
-                            color:#374151;
-                        ">
-                            Tahun
-                        </label>
-
-                        <select
-                            wire:model.live="tahun"
-                            style="
-                                width:100%;
-                                height:46px;
-                                border:1px solid #d1d5db;
-                                border-radius:12px;
-                                padding:0 14px;
-                                background:#fff;
-                                font-size:14px;
-                            "
-                        >
-                            @for($y = now()->year; $y >= now()->year - 5; $y--)
-
-                                <option value="{{ $y }}">
-                                    {{ $y }}
-                                </option>
-
-                            @endfor
-                        </select>
-                    </div>
-
-                    {{-- BARANG --}}
-                    <div>
-                        <label style="
-                            display:block;
-                            margin-bottom:8px;
-                            font-size:14px;
-                            font-weight:600;
-                            color:#374151;
-                        ">
-                            Barang
-                        </label>
-
-                        <select
-                            wire:model.live="barangId"
-                            style="
-                                width:100%;
-                                height:46px;
-                                border:1px solid #d1d5db;
-                                border-radius:12px;
-                                padding:0 14px;
-                                background:#fff;
-                                font-size:14px;
-                            "
-                        >
-                            <option value="">
-                                Semua Barang
+                            <option value="{{ $v }}">
+                                {{ $l }}
                             </option>
 
-                            @foreach($this->getBarangOptions() as $id => $namaBarang)
+                        @endforeach
+                    </select>
+                </div>
 
-                                <option value="{{ $id }}">
-                                    {{ $namaBarang }}
-                                </option>
+                {{-- TAHUN --}}
+                <div>
+                    <label style="
+                        display:block;
+                        margin-bottom:8px;
+                        font-size:14px;
+                        font-weight:600;
+                        color:#374151;
+                    ">
+                        Tahun
+                    </label>
 
-                            @endforeach
-                        </select>
-                    </div>
+                    <select
+                        wire:model.live="tahun"
+                        style="
+                            width:100%;
+                            height:46px;
+                            border:1px solid #d1d5db;
+                            border-radius:12px;
+                            padding:0 14px;
+                            background:#fff;
+                            font-size:14px;
+                        "
+                    >
+                        @for($y = now()->year; $y >= now()->year - 5; $y--)
 
+                            <option value="{{ $y }}">
+                                {{ $y }}
+                            </option>
+
+                        @endfor
+                    </select>
+                </div>
+
+                {{-- BARANG --}}
+                <div>
+                    <label style="
+                        display:block;
+                        margin-bottom:8px;
+                        font-size:14px;
+                        font-weight:600;
+                        color:#374151;
+                    ">
+                        Barang
+                    </label>
+
+                    <select
+                        wire:model.live="barangId"
+                        style="
+                            width:100%;
+                            height:46px;
+                            border:1px solid #d1d5db;
+                            border-radius:12px;
+                            padding:0 14px;
+                            background:#fff;
+                            font-size:14px;
+                        "
+                    >
+                        <option value="">
+                            Semua Barang
+                        </option>
+
+                        @foreach($this->getBarangOptions() as $id => $namaBarang)
+
+                            <option value="{{ $id }}">
+                                {{ $namaBarang }}
+                            </option>
+
+                        @endforeach
+                    </select>
                 </div>
 
             </div>
-
         </div>
 
         {{-- SUMMARY --}}
@@ -276,30 +295,66 @@
                         {{-- TABLE --}}
                         <div class="overflow-x-auto">
 
-                            <table class="w-full min-w-[1200px] text-sm">
+                            <table class="kartu-stok-average-table w-full min-w-[1040px] text-sm">
 
                                 <thead>
 
-                                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                                    <tr>
 
-                                        <th rowspan="2" class="px-4 py-4 text-center font-bold">
-                                            Tanggal
+                                        <th rowspan="2" class="px-4 py-2 text-left align-top">
+                                            TANGGAL
                                         </th>
 
-                                        <th rowspan="2" class="px-4 py-4 text-left font-bold">
-                                            Keterangan
+                                        <th colspan="3" class="px-4 py-2 text-center">
+                                            pembelian
                                         </th>
 
-                                        <th colspan="3" class="px-4 py-4 text-center font-bold">
-                                            Pembelian
+                                        <th colspan="3" class="px-4 py-2 text-center">
+                                            harga pokok penjualan
                                         </th>
 
-                                        <th colspan="3" class="px-4 py-4 text-center font-bold">
-                                            HPP
+                                        <th colspan="3" class="px-4 py-2 text-center">
+                                            persediaan
                                         </th>
 
-                                        <th colspan="3" class="px-4 py-4 text-center font-bold">
-                                            Persediaan
+                                    </tr>
+
+                                    <tr>
+
+                                        <th class="px-3 py-2 text-left">
+                                            Unit
+                                        </th>
+
+                                        <th class="px-3 py-2 text-left">
+                                            harga unit
+                                        </th>
+
+                                        <th class="px-3 py-2 text-left">
+                                            total
+                                        </th>
+
+                                        <th class="px-3 py-2 text-left">
+                                            unit
+                                        </th>
+
+                                        <th class="px-3 py-2 text-left">
+                                            harga unit
+                                        </th>
+
+                                        <th class="px-3 py-2 text-left">
+                                            total
+                                        </th>
+
+                                        <th class="px-3 py-2 text-left">
+                                            unit
+                                        </th>
+
+                                        <th class="px-3 py-2 text-left">
+                                            harga unit
+                                        </th>
+
+                                        <th class="px-3 py-2 text-left">
+                                            total
                                         </th>
 
                                     </tr>
@@ -316,21 +371,21 @@
                                                 {{ $row['tanggal'] ?? '-' }}
                                             </td>
 
-                                            <td class="px-4 py-4">
-                                                {{ $row['keterangan'] ?? '-' }}
-                                            </td>
-
                                             {{-- PEMBELIAN --}}
-                                            <td class="px-3 py-4 text-center">
-                                                {{ $fmtQty($row['pembelian']['qty'] ?? 0) }}
+                                            <td class="px-3 py-4 {{ ($row['jenis'] ?? '') === 'awal' ? 'text-left font-semibold uppercase' : 'text-center' }}">
+                                                @if(($row['jenis'] ?? '') === 'awal')
+                                                    SALDO AWAL
+                                                @else
+                                                    {{ $fmtQty($row['pembelian']['qty'] ?? 0) }}
+                                                @endif
                                             </td>
 
                                             <td class="px-3 py-4 text-right">
-                                                {{ $fmtNominal($row['pembelian']['harga'] ?? 0) }}
+                                                {{ $fmtRp($row['pembelian']['harga'] ?? 0) }}
                                             </td>
 
                                             <td class="px-3 py-4 text-right font-medium">
-                                                {{ $fmtNominal($row['pembelian']['total'] ?? 0) }}
+                                                {{ $fmtRp($row['pembelian']['total'] ?? 0) }}
                                             </td>
 
                                             {{-- HPP --}}
@@ -339,11 +394,11 @@
                                             </td>
 
                                             <td class="px-3 py-4 text-right">
-                                                {{ $fmtNominal($row['hpp']['harga'] ?? 0) }}
+                                                {{ $fmtRp($row['hpp']['harga'] ?? 0) }}
                                             </td>
 
-                                            <td class="px-3 py-4 text-right font-semibold text-red-600">
-                                                {{ $fmtNominal($row['hpp']['total'] ?? 0) }}
+                                            <td class="px-3 py-4 text-right font-semibold">
+                                                {{ $fmtRp($row['hpp']['total'] ?? 0) }}
                                             </td>
 
                                             {{-- PERSEDIAAN --}}
@@ -353,16 +408,12 @@
 
                                             <td class="px-3 py-4 text-right font-semibold">
 
-                                                {{ $fmtNominal($row['persediaan']['harga'] ?? 0) }}
-
-                                                @if($row['persediaan']['average_changed'] ?? false)
-                                                    <span class="text-amber-500 font-bold">*</span>
-                                                @endif
+                                                {{ $fmtRp($row['persediaan']['harga'] ?? 0) }}
 
                                             </td>
 
-                                            <td class="px-3 py-4 text-right font-bold text-emerald-700">
-                                                {{ $fmtNominal($row['persediaan']['total'] ?? 0) }}
+                                            <td class="px-3 py-4 text-right font-bold">
+                                                {{ $fmtRp($row['persediaan']['total'] ?? 0) }}
                                             </td>
 
                                         </tr>
@@ -375,7 +426,7 @@
 
                                     <tr class="bg-gray-100 dark:bg-gray-800 font-bold">
 
-                                        <td colspan="2" class="px-4 py-4 text-center">
+                                        <td class="px-4 py-4 text-center">
                                             TOTAL
                                         </td>
 
@@ -388,7 +439,7 @@
                                         </td>
 
                                         <td class="px-4 py-4 text-right">
-                                            {{ $fmtNominal($card['total_pembelian'] ?? 0) }}
+                                            {{ $fmtRp($card['total_pembelian'] ?? 0) }}
                                         </td>
 
                                         <td class="px-4 py-4 text-center">
@@ -400,7 +451,7 @@
                                         </td>
 
                                         <td class="px-4 py-4 text-right">
-                                            {{ $fmtNominal($card['total_hpp'] ?? 0) }}
+                                            {{ $fmtRp($card['total_hpp'] ?? 0) }}
                                         </td>
 
                                         <td class="px-4 py-4 text-center">
@@ -408,11 +459,11 @@
                                         </td>
 
                                         <td class="px-4 py-4 text-right">
-                                            {{ $fmtNominal($card['harga_rata_rata_akhir'] ?? 0) }}
+                                            {{ $fmtRp($card['harga_rata_rata_akhir'] ?? 0) }}
                                         </td>
 
                                         <td class="px-4 py-4 text-right">
-                                            {{ $fmtNominal($card['persediaan_akhir'] ?? 0) }}
+                                            {{ $fmtRp($card['persediaan_akhir'] ?? 0) }}
                                         </td>
 
                                     </tr>

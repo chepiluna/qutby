@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Sales\Widgets;
 
 use App\Models\Pembelian;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -24,7 +24,7 @@ class PembelianStats extends BaseWidget
             ->whereYear('tanggal', $tahunIni)
             ->count();
 
-        // Menunggu penerimaan GRN
+        // Menunggu penerimaan barang
         $statusProses = Pembelian::where('status', 'menunggu')->count();
 
         // Sudah diterima lengkap

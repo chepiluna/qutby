@@ -4,19 +4,20 @@
         {{-- FILTER + EXPORT --}}
         <x-filament::section>
 
-            {{-- FILTER --}}
-            <div class="mb-4">
-                {{ $this->form }}
-            </div>
-
             {{-- BUTTON --}}
-            <div class="flex justify-end">
+            <div class="mb-4 flex justify-end">
                 <button
                     wire:click="exportPdf"
-                    class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-primary-700 transition"
+                    type="button"
+                    style="display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 18px; background: #dc2626; color: #ffffff; font-size: 14px; font-weight: 600; border: 0; border-radius: 8px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);"
                 >
-                    📄 Export PDF
+                    Cetak PDF
                 </button>
+            </div>
+
+            {{-- FILTER --}}
+            <div>
+                {{ $this->form }}
             </div>
 
         </x-filament::section>
@@ -24,101 +25,70 @@
         {{-- DATA --}}
         @forelse($this->laporan as $index => $item)
 
-            <x-filament::section>
+            <div class="mb-6 rounded-xl border border-gray-200 overflow-hidden">
 
-                {{-- HEADER --}}
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <div class="text-base font-semibold">
-                            {{ $item['customer'] }}
-                        </div>
-
-                        <div class="text-sm text-gray-500 mt-1">
-                            Status:
-                            <span class="{{ $item['status'] == 'Lunas' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">
-                                {{ $item['status'] }}
-                            </span>
-                        </div>
+                {{-- HEADER MAROON --}}
+                <div class="bg-red-800 text-white px-4 py-3 flex justify-between items-center">
+                    <div class="font-semibold">
+                        {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }} - {{ $item['customer'] }}
                     </div>
-
-                    <div class="text-sm text-gray-500">
-                        NP: {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
+                    <div class="text-sm">
+                        Status: <strong>{{ $item['status'] }}</strong>
+                        &nbsp; | &nbsp;
+                        Saldo Akhir: <strong>Rp {{ number_format($item['saldo_akhir'], 0, ',', '.') }}</strong>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm table-fixed">
+                {{-- TABLE --}}
+                <div class="bg-white overflow-x-auto">
+                    <table class="w-full text-sm border-collapse">
 
                         {{-- HEADER --}}
-                        <thead class="bg-gray-50">
-                            <tr class="border-b">
-                                <th class="py-3 px-3 text-center font-semibold">Tanggal</th>
-                                <th class="py-3 px-3 text-center font-semibold">Ref</th>
-                                <th class="py-3 px-3 text-left font-semibold">Keterangan</th>
-                                <th class="py-3 px-3 text-right font-semibold">Debit</th>
-                                <th class="py-3 px-3 text-right font-semibold">Kredit</th>
-                                <th class="py-3 px-3 text-right font-semibold">Saldo</th>
+                        <thead class="bg-red-100 text-red-800">
+                            <tr>
+                                <th class="px-3 py-2 text-left">Tanggal</th>
+                                <th class="px-3 py-2 text-left">Keterangan</th>
+                                <th class="px-3 py-2 text-left">Ref</th>
+                                <th class="px-3 py-2 text-right">Debit</th>
+                                <th class="px-3 py-2 text-right">Kredit</th>
+                                <th class="px-3 py-2 text-right">Saldo</th>
                             </tr>
                         </thead>
 
                         {{-- BODY --}}
-                        <tbody class="divide-y divide-gray-100">
-
+                        <tbody>
                             @foreach($item['data'] as $row)
-                                <tr class="hover:bg-gray-50">
-
-                                    {{-- TANGGAL --}}
-                                    <td class="py-2 px-3 text-center whitespace-nowrap">
-                                        {{ \Carbon\Carbon::parse($row['tanggal'])->format('d-m-Y') }}
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-3 py-2">
+                                        {{ \Carbon\Carbon::parse($row['tanggal'])->format('d/m/Y') }}
                                     </td>
-
-                                    {{-- REF --}}
-                                    <td class="py-2 px-3 text-center">
-                                        {{ $row['ref'] }}
+                                    <td class="px-3 py-2">{{ $row['keterangan'] }}</td>
+                                    <td class="px-3 py-2">{{ $row['ref'] }}</td>
+                                    <td class="px-3 py-2 text-right text-black">
+                                        {{ $row['debit'] ? 'Rp ' . number_format($row['debit'], 0, ',', '.') : '-' }}
                                     </td>
-
-                                    {{-- KETERANGAN --}}
-                                    <td class="py-2 px-3">
-                                        {{ $row['keterangan'] }}
+                                    <td class="px-3 py-2 text-right text-black">
+                                        {{ $row['kredit'] ? 'Rp ' . number_format($row['kredit'], 0, ',', '.') : '-' }}
                                     </td>
-
-                                    {{-- DEBIT --}}
-                                    <td class="py-2 px-3 text-right tabular-nums whitespace-nowrap">
-                                        {{ $row['debit'] > 0 ? number_format($row['debit'],0,',','.') : '-' }}
+                                    <td class="px-3 py-2 text-right font-bold text-black">
+                                        Rp {{ number_format($row['saldo'], 0, ',', '.') }}
                                     </td>
-
-                                    {{-- KREDIT --}}
-                                    <td class="py-2 px-3 text-right tabular-nums whitespace-nowrap">
-                                        {{ $row['kredit'] > 0 ? number_format($row['kredit'],0,',','.') : '-' }}
-                                    </td>
-
-                                    {{-- SALDO --}}
-                                    <td class="py-2 px-3 text-right font-semibold tabular-nums whitespace-nowrap text-orange-600">
-                                        {{ number_format($row['saldo'],0,',','.') }}
-                                    </td>
-
                                 </tr>
                             @endforeach
-
                         </tbody>
 
                         {{-- FOOTER TOTAL --}}
-                        <tfoot class="bg-gray-50 border-t">
-                            <tr>
-                                <td colspan="3" class="py-3 px-3 font-semibold text-right">
-                                    TOTAL
+                        <tfoot>
+                            <tr class="bg-gray-100 font-bold">
+                                <td colspan="3" class="text-right px-3 py-2">Total</td>
+                                <td class="text-right px-3 py-2">
+                                    Rp {{ number_format($item['total_debit'], 0, ',', '.') }}
                                 </td>
-
-                                <td class="py-3 px-3 text-right font-semibold text-blue-600">
-                                    {{ number_format($item['total_debit'],0,',','.') }}
+                                <td class="text-right px-3 py-2">
+                                    Rp {{ number_format($item['total_kredit'], 0, ',', '.') }}
                                 </td>
-
-                                <td class="py-3 px-3 text-right font-semibold text-green-600">
-                                    {{ number_format($item['total_kredit'],0,',','.') }}
-                                </td>
-
-                                <td class="py-3 px-3 text-right font-bold text-orange-600">
-                                    {{ number_format($item['saldo_akhir'],0,',','.') }}
+                                <td class="text-right px-3 py-2">
+                                    Rp {{ number_format($item['saldo_akhir'], 0, ',', '.') }}
                                 </td>
                             </tr>
                         </tfoot>
@@ -126,7 +96,7 @@
                     </table>
                 </div>
 
-            </x-filament::section>
+            </div>
 
         @empty
             <x-filament::section>

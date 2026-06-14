@@ -20,7 +20,12 @@ class CreateVendor extends CreateRecord
      */
     public function getTitle(): string
     {
-        return 'Tambah Data Vendor';
+        return 'Tambah Vendor';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Tambah Vendor';
     }
 
     /**

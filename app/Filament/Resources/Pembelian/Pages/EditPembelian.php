@@ -27,6 +27,22 @@ class EditPembelian extends EditRecord
         PembelianResource::validateTerminState($this->form->getRawState());
     }
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (($data['syarat_pembayaran'] ?? null) === 'tunai') {
+            if (filled($data['vendor_manual'] ?? null)) {
+                $data['vendor_id'] = null;
+                $data['vendor_manual'] = trim((string) $data['vendor_manual']);
+            } else {
+                $data['vendor_manual'] = null;
+            }
+        } else {
+            $data['vendor_manual'] = null;
+        }
+
+        return $data;
+    }
+
     /**
      * ✅ SETELAH KLIK SIMPAN → KEMBALI KE DAFTAR PESANAN PEMBELIAN
      */

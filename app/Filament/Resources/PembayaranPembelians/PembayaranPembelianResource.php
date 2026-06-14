@@ -41,7 +41,7 @@ class PembayaranPembelianResource extends Resource
 
     protected static ?string $modelLabel = 'Pembayaran Utang';
 
-    protected static ?string $pluralModelLabel = 'Daftar Pembayaran Utang';
+    protected static ?string $pluralModelLabel = 'Pembayaran Utang';
 
     protected static ?string $recordTitleAttribute = 'nomor_faktur_vendor';
 
@@ -393,6 +393,6 @@ class PembayaranPembelianResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'finance';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'finance'], true);
     }
 }

@@ -13,7 +13,6 @@ use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Filament\Facades\Filament;
 use Filament\Infolists\Components\TextEntry;
@@ -22,12 +21,14 @@ class PembayaranResource extends Resource
 {
     protected static ?string $model = Pembayaran::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCurrencyDollar;
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-credit-card';
     protected static UnitEnum|string|null $navigationGroup = 'Transaksi';
 
     protected static ?string $navigationLabel = 'Pembayaran';
 
     protected static ?string $pluralModelLabel = 'Pembayaran';
+
+    protected static ?int $navigationSort = 1;
     protected static ?string $recordTitleAttribute = 'id';
 
     public static function form(Schema $schema): Schema
@@ -59,7 +60,7 @@ class PembayaranResource extends Resource
     
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'sales';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
     }
 
     public static function infolist(Schema $schema): Schema

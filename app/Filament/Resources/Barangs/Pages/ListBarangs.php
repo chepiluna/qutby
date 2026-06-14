@@ -12,6 +12,10 @@ class ListBarangs extends ListRecords
 
     protected static ?string $title = 'Daftar Barang';
 
+    protected static ?string $breadcrumb = 'Daftar Barang';
+
+    protected ?string $heading = 'Daftar Barang';
+
     protected function getHeaderActions(): array
     {
         return [

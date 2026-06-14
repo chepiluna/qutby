@@ -10,11 +10,26 @@ class ListPenjualans extends ListRecords
 {
     protected static string $resource = PenjualanResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Daftar Penjualan';
+    }
+
+    public function getHeading(): string
+    {
+        return 'Daftar Penjualan';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Daftar Penjualan';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Tambah Penjualan'), 
+                ->label('Buat Penjualan'), 
         ];
     }
 }

@@ -12,6 +12,7 @@ use App\Services\PenerimaanBarangKonfirmasiService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +23,26 @@ class CreatePenerimaanBarang extends CreateRecord
 
     public function getTitle(): string
     {
-        return 'Form Penerimaan Barang';
+        return 'Penerimaan Barang';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Buat Penerimaan Barang';
+    }
+
+    public function getHeading(): HtmlString
+    {
+        $url = e($this->getResource()::getUrl('index'));
+
+        return new HtmlString(<<<HTML
+            <span style="display:inline-flex; align-items:center; gap:12px;">
+                <a href="{$url}" aria-label="Kembali ke daftar penerimaan barang" style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9999px; background:#000000; color:#ffffff; text-decoration:none; line-height:1;">
+                    <span style="font-size:30px; font-weight:800; transform:translate(-1px, -1px);">&lsaquo;</span>
+                </a>
+                <span>Penerimaan Barang</span>
+            </span>
+        HTML);
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

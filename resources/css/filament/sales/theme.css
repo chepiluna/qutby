@@ -10,37 +10,302 @@
   --fin-red-1: #D92200;
   --fin-maroon: #920004;
   --fin-maroon-dark: #5A0006;
+  --sales-sidebar: #9B1B1B;
+  --sales-sidebar-dark: #6f1111;
+  --sales-sidebar-darker: #541010;
+  --sales-active: #6f1111;
+  --sales-hover: #821616;
+  --sales-scroll: rgba(255, 255, 255, 0.36);
 }
 
-/* Konten utama tetap putih */
-.fi-main {
+/* Header sales seperti referensi QUTRIX. */
+.fi-topbar {
+  min-height: 3.75rem !important;
   background: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+  padding: 0 1.5rem !important;
 }
 
-/* Sidebar gradient (finance) */
+.fi-topbar-start {
+  align-items: center !important;
+  gap: 1.25rem !important;
+  min-width: 0 !important;
+}
+
+.fi-topbar-start > a:not(.qutrix-brand) {
+  display: none !important;
+}
+
+.qutrix-brand {
+  align-items: center;
+  display: inline-flex;
+  min-height: 3.25rem;
+  min-width: 0;
+  position: relative;
+  text-decoration: none;
+}
+
+.qutrix-brand__image {
+  display: block;
+  height: 2.75rem;
+  max-width: min(15rem, 48vw);
+  object-fit: contain;
+  width: auto;
+}
+
+.fi-topbar-start > a:not(.qutrix-brand) > .fi-logo {
+  display: none !important;
+}
+
+.fi-topbar .fi-logo,
+.fi-topbar .fi-logo *,
+.fi-topbar-brand-text {
+  color: #111827 !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  text-transform: uppercase;
+}
+
+.qutrix-topbar-title {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.qutrix-topbar-title h1 {
+  color: #111827;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.qutrix-topbar-title nav {
+  align-items: center;
+  color: #777777;
+  display: flex;
+  flex-wrap: wrap;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.875rem;
+  gap: 0.45rem;
+  line-height: 1.1;
+}
+
+.fi-topbar-end {
+  align-items: center !important;
+  margin-left: auto !important;
+}
+
+.fi-topbar-database-notifications-btn {
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.5rem !important;
+  color: #111827 !important;
+  display: inline-flex !important;
+  gap: 0.5rem !important;
+  height: 2.25rem !important;
+  padding: 0 0.875rem !important;
+  width: auto !important;
+}
+
+.fi-topbar-database-notifications-btn::after {
+  color: #111827;
+  content: "Notifikasi";
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.fi-topbar-database-notifications-btn svg {
+  color: #030303 !important;
+  height: 1rem !important;
+  width: 1rem !important;
+}
+
+.fi-topbar-database-notifications-btn:hover {
+  background: #f9fafb !important;
+  border-color: #cbd5e1 !important;
+}
+
+.fi-topbar-end {
+  gap: 0.75rem !important;
+}
+
+.fi-user-menu-trigger {
+  align-items: center !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  height: 2.25rem !important;
+  justify-content: center !important;
+  width: 2.25rem !important;
+}
+
+.fi-user-avatar,
+.fi-user-menu-trigger .fi-avatar {
+  background: #111111 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  height: 2.25rem !important;
+  object-fit: cover !important;
+  width: 2.25rem !important;
+}
+
+@media (max-width: 768px) {
+  .fi-topbar {
+    min-height: auto !important;
+    padding-block: 0.75rem !important;
+    padding-inline: 1rem !important;
+  }
+
+  .fi-topbar-start {
+    gap: 0.875rem !important;
+  }
+
+  .qutrix-brand {
+    min-width: 0;
+  }
+
+  .qutrix-brand__image {
+    height: 2.25rem;
+    max-width: 10rem;
+  }
+
+  .qutrix-topbar-title h1 {
+    font-size: 0.95rem;
+  }
+
+  .qutrix-topbar-title nav,
+  .fi-topbar-database-notifications-btn::after {
+    font-size: 0.8rem;
+  }
+
+  .fi-topbar-database-notifications-btn {
+    padding: 0 0.75rem !important;
+  }
+}
+
+/* Area kerja jangan putih polos supaya tidak kelihatan bleber di samping sidebar. */
+.fi-main,
+.fi-main-ctn,
+.fi-page {
+  background: #f7f7f8 !important;
+}
+
+.fi-sidebar,
+.fi-sidebar-header,
+.fi-sidebar-nav {
+  background: var(--sales-sidebar) !important;
+}
+
+.fi-sidebar-nav {
+  padding: 1rem 0.875rem 1rem !important;
+}
+
 .fi-sidebar {
-  background: linear-gradient(
-    180deg,
-    var(--fin-maroon-dark),
-    var(--fin-maroon),
-    var(--fin-red-1),
-    var(--fin-orange-2)
-  ) !important;
+  width: 15rem !important;
+  min-width: 15rem !important;
+  max-width: 15rem !important;
+  scrollbar-color: var(--sales-scroll) var(--sales-sidebar);
+}
+
+.fi-sidebar ::-webkit-scrollbar,
+.fi-sidebar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.fi-sidebar ::-webkit-scrollbar-track,
+.fi-sidebar::-webkit-scrollbar-track {
+  background: var(--sales-sidebar);
+}
+
+.fi-sidebar ::-webkit-scrollbar-thumb,
+.fi-sidebar::-webkit-scrollbar-thumb {
+  background: var(--sales-scroll);
+  border-radius: 999px;
+}
+
+.fi-sidebar {
+  background: var(--sales-sidebar) !important;
 }
 
 .fi-sidebar,
 .fi-sidebar * {
-  color: rgba(255, 255, 255, 0.95);
+  font-family: inherit !important;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.fi-sidebar-header {
+  min-height: 4rem !important;
+  padding: 0.875rem 1rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.fi-sidebar-header .fi-logo img {
+  height: 2.25rem !important;
+  max-height: 2.25rem !important;
+}
+
+.fi-sidebar-group {
+  margin-top: 1rem !important;
+}
+
+.fi-sidebar-group:first-child {
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar-item {
+  margin-top: 0.25rem !important;
+}
+
+.fi-sidebar-item > a,
+.fi-sidebar-item-button {
+  min-height: 2.5rem !important;
+  border-radius: 0.5rem !important;
+  padding: 0.55rem 0.7rem !important;
+}
+
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span {
+  color: rgba(255, 255, 255, 0.84) !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+}
+
+.fi-sidebar-item-icon {
+  color: rgba(255, 255, 255, 0.82) !important;
+  width: 1.18rem !important;
+  height: 1.18rem !important;
 }
 
 /* ACTIVE NAV: jangan putih, kasih highlight orange transparan */
 .fi-sidebar-item-active > a {
-  background: rgba(243, 113, 0, 0.35) !important; /* fin-orange-1 */
+  background: var(--sales-active) !important;
 }
 
 .fi-sidebar .fi-sidebar-item-active {
-  background: rgba(243, 113, 0, 0.16) !important;
-  border-left: 3px solid var(--fin-orange-1) !important;
+  background: transparent !important;
+  border-left: 0 !important;
 }
 
 /* Layer aktif (biar konsisten) */
@@ -48,7 +313,7 @@
 .fi-sidebar .fi-sidebar-item-active > a,
 .fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
 .fi-sidebar .fi-sidebar-item.fi-active > a {
-  background: rgba(243, 113, 0, 0.28) !important;
+  background: var(--sales-active) !important;
 }
 
 /* Tulisan/icon item aktif tetap kebaca */
@@ -59,15 +324,15 @@
 
 /* Hover nav */
 .fi-sidebar .fi-sidebar-item > a:hover {
-  background: rgba(243, 80, 10, 0.22) !important; /* fin-orange-2 */
+  background: var(--sales-hover) !important;
 }
 
 /* Focus nav */
 .fi-sidebar .fi-sidebar-item > a:focus,
 .fi-sidebar .fi-sidebar-item > a:focus-visible {
-  background: rgba(243, 80, 10, 0.26) !important;
+  background: var(--sales-sidebar-darker) !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(243, 80, 10, 0.22) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14) !important;
 }
 
 /* Card/section */
@@ -436,4 +701,164 @@
   .sales-dashboard-card--donut {
     min-height: 260px;
   }
+}
+
+/* Match operational sidebar UI with the finance panel. */
+.fi-sidebar,
+.fi-sidebar-header,
+.fi-sidebar-nav {
+  background: #ffffff !important;
+}
+
+.fi-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #e8edf3 !important;
+  box-shadow: 1px 0 0 rgba(15, 23, 42, 0.03) !important;
+  max-width: 18rem !important;
+  min-width: 18rem !important;
+  scrollbar-color: #cbd5e1 #ffffff !important;
+  width: 18rem !important;
+}
+
+.fi-sidebar-nav {
+  background: #ffffff !important;
+  gap: 0.55rem !important;
+  padding: 0 0.95rem 1.25rem !important;
+}
+
+.fi-sidebar-nav-groups {
+  gap: 0.55rem !important;
+  margin-inline: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar,
+.fi-sidebar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.fi-sidebar ::-webkit-scrollbar-track,
+.fi-sidebar::-webkit-scrollbar-track {
+  background: #ffffff !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar-thumb,
+.fi-sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border-radius: 999px;
+}
+
+.fi-sidebar-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #eef2f7 !important;
+  min-height: 4.25rem !important;
+}
+
+.fi-sidebar,
+.fi-sidebar *,
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span,
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span,
+.fi-sidebar-item-icon {
+  color: #4b5563 !important;
+}
+
+.fi-sidebar-group {
+  gap: 0.28rem !important;
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-group:first-child,
+.fi-sidebar-nav-groups > .fi-sidebar-group:first-child,
+.fi-sidebar-nav-groups > li:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span {
+  color: #6b7280 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.15 !important;
+}
+
+.fi-sidebar-group-btn,
+.fi-sidebar-group-button,
+.fi-sidebar-group-collapse-btn {
+  min-height: 2.2rem !important;
+  padding: 0.35rem 0.65rem !important;
+}
+
+.fi-sidebar-group-items {
+  gap: 0.22rem !important;
+}
+
+.fi-sidebar-item {
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-item > a,
+.fi-sidebar-item-button {
+  align-items: center !important;
+  border-radius: 0.72rem !important;
+  min-height: 2.45rem !important;
+  padding: 0.52rem 0.75rem !important;
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span {
+  color: #4b5563 !important;
+  font-size: 0.92rem !important;
+  font-weight: 650 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar-item-icon {
+  color: #6b7280 !important;
+  height: 1.18rem !important;
+  margin-top: 0 !important;
+  width: 1.18rem !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover,
+.fi-sidebar .fi-sidebar-item-button:hover {
+  background: #f4f6f8 !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item > a:hover span,
+.fi-sidebar .fi-sidebar-item-button:hover span,
+.fi-sidebar .fi-sidebar-item > a:hover .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item-button:hover .fi-sidebar-item-icon {
+  color: #1f2937 !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active,
+.fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item.fi-active > a {
+  background: #fee2e2 !important;
+  border-radius: 0.72rem !important;
+  box-shadow: inset 3px 0 0 #a91323 !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active > a:hover,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button:hover {
+  background: #fecaca !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item-active a span {
+  color: #991b1b !important;
 }

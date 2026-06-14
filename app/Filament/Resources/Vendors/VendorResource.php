@@ -11,7 +11,6 @@ use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Support\Icons\Heroicon;
 //use App\Filament\Traits\HasRoleAccess;
 
 class VendorResource extends Resource
@@ -21,14 +20,15 @@ class VendorResource extends Resource
     protected static array $allowedRoles = ['finance', 'operasional'];
     protected static ?string $model = Vendor::class;
 
-    protected static string|BackedEnum|null $navigationIcon =
-        Heroicon::OutlinedBuildingStorefront;
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-building-store';
 
     protected static UnitEnum|string|null $navigationGroup = 'Master Data';
 
     protected static ?string $navigationLabel = 'Vendor';
 
-    protected static ?string $pluralModelLabel = 'Daftar Vendor';
+    protected static ?string $pluralModelLabel = 'Vendor';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'nama_vendor';
 
@@ -72,6 +72,6 @@ class VendorResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return \Filament\Facades\Filament::getCurrentPanel()?->getId() === 'sales';
+        return in_array(\Filament\Facades\Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
     }
 }

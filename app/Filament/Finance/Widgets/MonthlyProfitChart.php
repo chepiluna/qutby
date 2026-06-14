@@ -20,22 +20,28 @@ class MonthlyProfitChart extends ChartWidget
         $incomeData = [];
         $expenseData = [];
         $profitData = [];
+        $start = Carbon::now()->subMonths(11)->startOfMonth();
+        $end = Carbon::now()->endOfMonth();
+
+        $incomeRows = DB::table('pembayaran')
+            ->selectRaw("DATE_FORMAT(tanggal_bayar, '%Y-%m') as month_key, SUM(jumlah_bayar) as total")
+            ->whereBetween('tanggal_bayar', [$start, $end])
+            ->groupBy('month_key')
+            ->pluck('total', 'month_key');
+
+        $expenseRows = DB::table('pengeluaran')
+            ->selectRaw("DATE_FORMAT(tanggal_pengeluaran, '%Y-%m') as month_key, SUM(jumlah) as total")
+            ->whereBetween('tanggal_pengeluaran', [$start, $end])
+            ->groupBy('month_key')
+            ->pluck('total', 'month_key');
 
         // Ambil 12 bulan terakhir
         for ($i = 11; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
+            $monthKey = $date->format('Y-m');
 
-            $income = DB::table('pembayaran')
-                ->whereNotNull('tanggal_bayar')
-                ->whereYear('tanggal_bayar', $date->year)
-                ->whereMonth('tanggal_bayar', $date->month)
-                ->sum('jumlah_bayar');
-
-            $expense = DB::table('pengeluaran')
-                ->whereNotNull('tanggal_pengeluaran')
-                ->whereYear('tanggal_pengeluaran', $date->year)
-                ->whereMonth('tanggal_pengeluaran', $date->month)
-                ->sum('jumlah');
+            $income = (float) ($incomeRows[$monthKey] ?? 0);
+            $expense = (float) ($expenseRows[$monthKey] ?? 0);
 
             $profit = $income - $expense;
 

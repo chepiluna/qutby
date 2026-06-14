@@ -47,7 +47,7 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
     {
         return $schema
             ->components([
-                Section::make('Filter')
+                Section::make()
                     ->schema([
                         Grid::make(1)->schema([
                             Select::make('customer_id')
@@ -160,7 +160,7 @@ class LaporanBukuPembantuPiutang extends Page implements HasSchemas
     }
 
     // =====================================
-    // 🔥 EXPORT PDF
+    // 🔥 CETAK PDF
     // =====================================
     public function exportPdf()
     {

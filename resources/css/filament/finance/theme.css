@@ -234,3 +234,1134 @@
 .fi-wi-stats-overview .finance-stat .fi-wi-stats-overview-stat-value{
   font-weight: 800 !important;
 }
+
+/* ===== Finance panel shell: QUTRIX management UI ===== */
+:root {
+  --finance-sidebar: #9B1B1B;
+  --finance-sidebar-dark: #6f1111;
+  --finance-sidebar-darker: #541010;
+  --finance-sidebar-hover: #821616;
+  --finance-scroll: rgba(255, 255, 255, 0.36);
+  --finance-border: #d7dee8;
+  --finance-muted: #5f718d;
+}
+
+.fi-body,
+.fi-main,
+.fi-main-ctn,
+.fi-page {
+  background: #f7f7f8 !important;
+}
+
+.fi-topbar {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+  min-height: 3.75rem !important;
+  padding: 0 1.5rem !important;
+}
+
+.fi-topbar-start {
+  align-items: center !important;
+  gap: 1.25rem !important;
+  min-width: 0 !important;
+}
+
+.fi-topbar-start > a:not(.qutrix-brand) {
+  display: none !important;
+}
+
+.qutrix-brand {
+  align-items: center;
+  display: inline-flex;
+  min-height: 3.25rem;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.qutrix-brand__image {
+  display: block;
+  height: 2.75rem;
+  max-width: min(15rem, 48vw);
+  object-fit: contain;
+  width: auto;
+}
+
+.fi-topbar-end {
+  align-items: center !important;
+  gap: 0.75rem !important;
+  margin-left: auto !important;
+}
+
+.fi-topbar-database-notifications-btn {
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.5rem !important;
+  color: #111827 !important;
+  display: inline-flex !important;
+  gap: 0.5rem !important;
+  height: 2.25rem !important;
+  padding: 0 0.875rem !important;
+  width: auto !important;
+}
+
+.fi-topbar-database-notifications-btn::after {
+  color: #111827;
+  content: "Notifikasi";
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.fi-topbar-database-notifications-btn svg {
+  color: #111827 !important;
+  height: 1rem !important;
+  width: 1rem !important;
+}
+
+.fi-topbar-database-notifications-btn:hover {
+  background: #f9fafb !important;
+  border-color: #cbd5e1 !important;
+}
+
+.fi-user-menu-trigger {
+  align-items: center !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  height: 2.25rem !important;
+  justify-content: center !important;
+  width: 2.25rem !important;
+}
+
+.fi-user-avatar,
+.fi-user-menu-trigger .fi-avatar {
+  background: #111111 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  height: 2.25rem !important;
+  object-fit: cover !important;
+  width: 2.25rem !important;
+}
+
+.fi-sidebar,
+.fi-sidebar-header,
+.fi-sidebar-nav {
+  background: var(--finance-sidebar) !important;
+}
+
+.fi-sidebar {
+  max-width: 15rem !important;
+  min-width: 15rem !important;
+  scrollbar-color: var(--finance-scroll) var(--finance-sidebar);
+  width: 15rem !important;
+}
+
+.fi-sidebar-nav {
+  padding: 1rem 0.875rem 1rem !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar,
+.fi-sidebar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.fi-sidebar ::-webkit-scrollbar-track,
+.fi-sidebar::-webkit-scrollbar-track {
+  background: var(--finance-sidebar);
+}
+
+.fi-sidebar ::-webkit-scrollbar-thumb,
+.fi-sidebar::-webkit-scrollbar-thumb {
+  background: var(--finance-scroll);
+  border-radius: 999px;
+}
+
+.fi-sidebar,
+.fi-sidebar * {
+  color: rgba(255, 255, 255, 0.84) !important;
+  font-family: inherit !important;
+}
+
+.fi-sidebar-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  min-height: 4rem !important;
+  padding: 0.875rem 1rem !important;
+}
+
+.fi-sidebar-group {
+  margin-top: 1rem !important;
+}
+
+.fi-sidebar-group:first-child {
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar-item {
+  margin-top: 0.25rem !important;
+}
+
+.fi-sidebar-item > a,
+.fi-sidebar-item-button {
+  border-radius: 0.5rem !important;
+  min-height: 2.5rem !important;
+  padding: 0.55rem 0.7rem !important;
+}
+
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span {
+  color: rgba(255, 255, 255, 0.84) !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar-item-icon {
+  color: rgba(255, 255, 255, 0.82) !important;
+  height: 1.18rem !important;
+  width: 1.18rem !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active,
+.fi-sidebar .fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item.fi-active > a {
+  background: var(--finance-sidebar-dark) !important;
+  border-left: 0 !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover {
+  background: var(--finance-sidebar-hover) !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:focus,
+.fi-sidebar .fi-sidebar-item > a:focus-visible {
+  background: var(--finance-sidebar-darker) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14) !important;
+  outline: none !important;
+}
+
+/* Final finance/operational parity override. */
+.fi-sidebar.fi-sidebar {
+  max-width: 15rem !important;
+  min-width: 15rem !important;
+  width: 15rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-nav {
+  padding: 1rem 0.875rem 1rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-group {
+  margin-top: 1rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button span {
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item {
+  margin-top: 0.25rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item > a,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-button {
+  align-items: center !important;
+  border-radius: 0.5rem !important;
+  min-height: 2.5rem !important;
+  padding: 0.55rem 0.7rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-item a span,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-button span {
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item-icon {
+  height: 1.18rem !important;
+  margin-top: 0 !important;
+  width: 1.18rem !important;
+}
+
+.fi-header {
+  margin-bottom: 1.75rem !important;
+}
+
+.fi-header-heading {
+  color: #030712 !important;
+  font-size: clamp(1.8rem, 2.2vw, 2.45rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.1 !important;
+}
+
+.fi-wi,
+.fi-section {
+  background: #ffffff !important;
+  border: 1px solid var(--finance-border) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+}
+
+.fi-wi-stats-overview {
+  gap: 0.875rem !important;
+}
+
+.fi-wi-stats-overview .finance-stat,
+.fi-wi-stats-overview .stat-card {
+  background: #fff5f0 !important;
+  border: 1px solid var(--finance-border) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+  min-height: 8.5rem !important;
+  padding: 1.25rem 1rem !important;
+}
+
+.fi-wi-stats-overview .finance-stat--danger {
+  background: #eef6ff !important;
+}
+
+.fi-wi-stats-overview .finance-stat:hover,
+.fi-wi-stats-overview .stat-card:hover {
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+.fi-wi-stats-overview .finance-stat,
+.fi-wi-stats-overview .finance-stat *,
+.fi-wi-stats-overview .stat-card,
+.fi-wi-stats-overview .stat-card * {
+  color: #020617 !important;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat-label {
+  color: var(--finance-muted) !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat-value {
+  color: #020617 !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat-description {
+  color: var(--finance-muted) !important;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+}
+
+.fi-wi-chart .fi-section {
+  border: 1px solid var(--finance-border) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+}
+
+.fi-wi-chart .fi-section-heading {
+  color: #020617 !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+}
+
+@media (max-width: 768px) {
+  .fi-topbar {
+    min-height: auto !important;
+    padding-block: 0.75rem !important;
+    padding-inline: 1rem !important;
+  }
+
+  .qutrix-brand {
+    min-width: 0;
+  }
+
+  .qutrix-brand__image {
+    height: 2.25rem;
+    max-width: 10rem;
+  }
+
+  .fi-topbar-database-notifications-btn {
+    padding: 0 0.75rem !important;
+  }
+
+  .fi-topbar-database-notifications-btn::after {
+    display: none;
+  }
+}
+
+/* Long finance sidebar labels should wrap instead of being truncated. */
+.fi-sidebar .fi-sidebar-item > a,
+.fi-sidebar .fi-sidebar-item-button {
+  align-items: flex-start !important;
+  min-height: 2.75rem !important;
+}
+
+.fi-sidebar .fi-sidebar-item-icon {
+  flex-shrink: 0 !important;
+  margin-top: 0.125rem !important;
+}
+
+.fi-sidebar .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item a span,
+.fi-sidebar .fi-sidebar-item-button span {
+  min-width: 0 !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+}
+
+/* Match finance sidebar with the operational panel sidebar. */
+.fi-sidebar,
+.fi-sidebar-header,
+.fi-sidebar-nav {
+  background: var(--finance-sidebar) !important;
+}
+
+.fi-sidebar {
+  background: var(--finance-sidebar) !important;
+  max-width: 15rem !important;
+  min-width: 15rem !important;
+  scrollbar-color: var(--finance-scroll) var(--finance-sidebar) !important;
+  width: 15rem !important;
+}
+
+.fi-sidebar-nav {
+  padding: 1rem 0.875rem 1rem !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar,
+.fi-sidebar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.fi-sidebar ::-webkit-scrollbar-track,
+.fi-sidebar::-webkit-scrollbar-track {
+  background: var(--finance-sidebar) !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar-thumb,
+.fi-sidebar::-webkit-scrollbar-thumb {
+  background: var(--finance-scroll) !important;
+  border-radius: 999px;
+}
+
+.fi-sidebar,
+.fi-sidebar * {
+  color: rgba(255, 255, 255, 0.84) !important;
+  font-family: inherit !important;
+}
+
+.fi-sidebar-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  min-height: 4rem !important;
+  padding: 0.875rem 1rem !important;
+}
+
+.fi-sidebar-header .fi-logo img {
+  height: 2.25rem !important;
+  max-height: 2.25rem !important;
+}
+
+.fi-sidebar-group {
+  margin-top: 1rem !important;
+}
+
+.fi-sidebar-group:first-child {
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar-item {
+  margin-top: 0.25rem !important;
+}
+
+.fi-sidebar-item > a,
+.fi-sidebar-item-button {
+  align-items: flex-start !important;
+  border-radius: 0.5rem !important;
+  min-height: 2.5rem !important;
+  padding: 0.55rem 0.7rem !important;
+}
+
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span {
+  color: rgba(255, 255, 255, 0.84) !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.25 !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+}
+
+.fi-sidebar-item-icon {
+  color: rgba(255, 255, 255, 0.82) !important;
+  flex-shrink: 0 !important;
+  height: 1.18rem !important;
+  margin-top: 0.125rem !important;
+  width: 1.18rem !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active {
+  background: transparent !important;
+  border-left: 0 !important;
+}
+
+.fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active,
+.fi-sidebar .fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item.fi-active > a {
+  background: var(--finance-active) !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item-active a span {
+  color: rgba(255, 255, 255, 0.98) !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover,
+.fi-sidebar .fi-sidebar-item-button:hover {
+  background: var(--finance-hover) !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active > a:hover,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button:hover {
+  background: var(--finance-active) !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:focus,
+.fi-sidebar .fi-sidebar-item > a:focus-visible {
+  background: var(--finance-sidebar-darker) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14) !important;
+  outline: none !important;
+}
+
+/* Keep the finance dashboard compact under the page title. */
+.fi-page {
+  gap: 0.875rem !important;
+}
+
+.fi-header {
+  margin-bottom: 0.75rem !important;
+}
+
+.fi-page .fi-page-content,
+.fi-page > section {
+  gap: 0.875rem !important;
+}
+
+.fi-wi.fi-wi-stats-overview,
+.fi-wi-stats-overview .fi-section,
+.fi-wi-stats-overview .fi-sc-section,
+.fi-wi-stats-overview .fi-section-content {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.fi-wi-stats-overview {
+  gap: 1rem !important;
+  row-gap: 1rem !important;
+  column-gap: 1rem !important;
+}
+
+.fi-wi-stats-overview > *,
+.fi-wi-stats-overview .grid,
+.fi-wi-stats-overview .fi-sc,
+.fi-wi-stats-overview .fi-sc.fi-sc-has-gap,
+.fi-wi-stats-overview .fi-sc-section,
+.fi-wi-stats-overview .fi-section-content {
+  gap: 1rem !important;
+  row-gap: 1rem !important;
+  column-gap: 1rem !important;
+}
+
+.fi-wi-stats-overview .finance-stat,
+.fi-wi-stats-overview .stat-card,
+.fi-wi-stats-overview .fi-wi-stats-overview-stat {
+  border-radius: 0.5rem !important;
+  min-height: 7.25rem !important;
+  padding: 1rem !important;
+}
+
+/* White finance sidebar. */
+:root {
+  --finance-sidebar: #ffffff;
+  --finance-sidebar-dark: #f3f4f6;
+  --finance-sidebar-darker: #e5e7eb;
+  --finance-sidebar-hover: #f9fafb;
+  --finance-active: #f3f4f6;
+  --finance-hover: #f9fafb;
+  --finance-scroll: #cbd5e1;
+}
+
+.fi-sidebar,
+.fi-sidebar-header,
+.fi-sidebar-nav {
+  background: #ffffff !important;
+}
+
+.fi-sidebar {
+  border-right: 1px solid #e5e7eb !important;
+  max-width: 18rem !important;
+  min-width: 18rem !important;
+  scrollbar-color: #cbd5e1 #ffffff !important;
+  width: 18rem !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar-track,
+.fi-sidebar::-webkit-scrollbar-track {
+  background: #ffffff !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar-thumb,
+.fi-sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+}
+
+.fi-sidebar,
+.fi-sidebar *,
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span,
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span,
+.fi-sidebar-item-icon {
+  color: #4b5563 !important;
+}
+
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span {
+  color: #374151 !important;
+}
+
+.fi-sidebar-header {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active,
+.fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item.fi-active > a {
+  background: #A91323 !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item-active a span {
+  color: #ffffff !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover,
+.fi-sidebar .fi-sidebar-item-button:hover {
+  background: #f9fafb !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:focus,
+.fi-sidebar .fi-sidebar-item > a:focus-visible {
+  background: #e5e7eb !important;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.10) !important;
+}
+
+/* Polished finance sidebar. */
+.fi-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #e8edf3 !important;
+  box-shadow: 1px 0 0 rgba(15, 23, 42, 0.03) !important;
+}
+
+.fi-sidebar-nav {
+  padding: 0 0.95rem 1.25rem !important;
+  gap: 0.55rem !important;
+}
+
+.fi-sidebar-nav-groups {
+  gap: 0.55rem !important;
+  margin-inline: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.fi-sidebar-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #eef2f7 !important;
+  min-height: 4.25rem !important;
+}
+
+.fi-sidebar-group {
+  gap: 0.28rem !important;
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-group:first-child {
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-nav-groups > .fi-sidebar-group:first-child,
+.fi-sidebar-nav-groups > li:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span {
+  color: #6b7280 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.15 !important;
+}
+
+.fi-sidebar-group-btn,
+.fi-sidebar-group-button,
+.fi-sidebar-group-collapse-btn {
+  min-height: 2.2rem !important;
+  padding: 0.35rem 0.65rem !important;
+}
+
+.fi-sidebar-group-items {
+  gap: 0.22rem !important;
+}
+
+.fi-sidebar-item {
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-item > a,
+.fi-sidebar-item-button {
+  align-items: center !important;
+  border-radius: 0.72rem !important;
+  min-height: 2.45rem !important;
+  padding: 0.52rem 0.75rem !important;
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease !important;
+}
+
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span {
+  color: #4b5563 !important;
+  font-size: 0.92rem !important;
+  font-weight: 650 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar-item-icon {
+  color: #6b7280 !important;
+  height: 1.18rem !important;
+  margin-top: 0 !important;
+  width: 1.18rem !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover,
+.fi-sidebar .fi-sidebar-item-button:hover {
+  background: #f4f6f8 !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item > a:hover span,
+.fi-sidebar .fi-sidebar-item-button:hover span,
+.fi-sidebar .fi-sidebar-item > a:hover .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item-button:hover .fi-sidebar-item-icon {
+  color: #1f2937 !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active,
+.fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item.fi-active > a {
+  background: #fee2e2 !important;
+  border-radius: 0.72rem !important;
+  box-shadow: inset 3px 0 0 #a91323 !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active > a:hover,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button:hover {
+  background: #fecaca !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item-active a span {
+  color: #991b1b !important;
+}
+
+/* Visual parity pass: make finance match the operational screenshot. */
+.fi-sidebar.fi-sidebar,
+.fi-sidebar {
+  max-width: 16.5rem !important;
+  min-width: 16.5rem !important;
+  width: 16.5rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-nav,
+.fi-sidebar .fi-sidebar-nav {
+  padding: 0 0.8rem 1.25rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item > a,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item > a,
+.fi-sidebar .fi-sidebar-item-button {
+  min-height: 2.35rem !important;
+  padding: 0.48rem 0.68rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-item a span,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-button span,
+.fi-sidebar .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item a span,
+.fi-sidebar .fi-sidebar-item-button span {
+  font-size: 0.88rem !important;
+  font-weight: 650 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button span,
+.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar .fi-sidebar-group-button,
+.fi-sidebar .fi-sidebar-group-button span {
+  font-size: 0.76rem !important;
+}
+
+/* Final parity with operational sidebar sizing. */
+.fi-sidebar.fi-sidebar,
+.fi-sidebar {
+  max-width: 18rem !important;
+  min-width: 18rem !important;
+  width: 18rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-nav,
+.fi-sidebar .fi-sidebar-nav {
+  padding: 0 0.95rem 1.25rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item > a,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item > a,
+.fi-sidebar .fi-sidebar-item-button {
+  min-height: 2.45rem !important;
+  padding: 0.52rem 0.75rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-item a span,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-button span,
+.fi-sidebar .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item a span,
+.fi-sidebar .fi-sidebar-item-button span {
+  font-size: 0.92rem !important;
+  font-weight: 650 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button span,
+.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar .fi-sidebar-group-button,
+.fi-sidebar .fi-sidebar-group-button span {
+  font-size: 0.78rem !important;
+}
+
+/* Higher-specificity finance overrides to beat older finance sidebar rules. */
+.fi-sidebar.fi-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #e8edf3 !important;
+  box-shadow: 1px 0 0 rgba(15, 23, 42, 0.03) !important;
+  max-width: 18rem !important;
+  min-width: 18rem !important;
+  width: 18rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-nav {
+  background: #ffffff !important;
+  gap: 0.55rem !important;
+  padding: 0 0.95rem 1.25rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-nav-groups {
+  gap: 0.55rem !important;
+  margin-inline: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-group {
+  gap: 0.28rem !important;
+  margin-top: 0 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button span {
+  color: #6b7280 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.15 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-group-btn,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-button,
+.fi-sidebar.fi-sidebar .fi-sidebar-group-collapse-btn {
+  min-height: 2.2rem !important;
+  padding: 0.35rem 0.65rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-group-items {
+  gap: 0.22rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item {
+  margin-top: 0 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item > a,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-button {
+  align-items: center !important;
+  border-radius: 0.72rem !important;
+  min-height: 2.45rem !important;
+  padding: 0.52rem 0.75rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-item a span,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-button span {
+  color: #4b5563 !important;
+  font-size: 0.92rem !important;
+  font-weight: 650 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item-icon {
+  color: #6b7280 !important;
+  height: 1.18rem !important;
+  margin-top: 0 !important;
+  width: 1.18rem !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item-active,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-active > a,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
+.fi-sidebar.fi-sidebar .fi-sidebar-item.fi-active > a {
+  background: #fee2e2 !important;
+  border-radius: 0.72rem !important;
+  box-shadow: inset 3px 0 0 #a91323 !important;
+}
+
+.fi-sidebar.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-sidebar.fi-sidebar .fi-sidebar-item-active a span {
+  color: #991b1b !important;
+}
+
+/* Final width parity with the operational sidebar. */
+.fi-sidebar.fi-sidebar {
+  max-width: 18rem !important;
+  min-width: 18rem !important;
+  width: 18rem !important;
+}
+
+/* Match finance sidebar UI exactly with the operational panel. */
+.fi-sidebar,
+.fi-sidebar-header,
+.fi-sidebar-nav {
+  background: #ffffff !important;
+}
+
+.fi-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #e8edf3 !important;
+  box-shadow: 1px 0 0 rgba(15, 23, 42, 0.03) !important;
+  max-width: 18rem !important;
+  min-width: 18rem !important;
+  scrollbar-color: #cbd5e1 #ffffff !important;
+  width: 18rem !important;
+}
+
+.fi-sidebar-nav {
+  background: #ffffff !important;
+  gap: 0.55rem !important;
+  padding: 0 0.95rem 1.25rem !important;
+}
+
+.fi-sidebar-nav-groups {
+  gap: 0.55rem !important;
+  margin-inline: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar,
+.fi-sidebar::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.fi-sidebar ::-webkit-scrollbar-track,
+.fi-sidebar::-webkit-scrollbar-track {
+  background: #ffffff !important;
+}
+
+.fi-sidebar ::-webkit-scrollbar-thumb,
+.fi-sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border-radius: 999px;
+}
+
+.fi-sidebar-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #eef2f7 !important;
+  min-height: 4.25rem !important;
+}
+
+.fi-sidebar,
+.fi-sidebar *,
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span,
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span,
+.fi-sidebar-item-icon {
+  color: #4b5563 !important;
+}
+
+.fi-sidebar-group {
+  gap: 0.28rem !important;
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-group:first-child,
+.fi-sidebar-nav-groups > .fi-sidebar-group:first-child,
+.fi-sidebar-nav-groups > li:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.fi-sidebar-group-label,
+.fi-sidebar-group-button,
+.fi-sidebar-group-button span {
+  color: #6b7280 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.15 !important;
+}
+
+.fi-sidebar-group-btn,
+.fi-sidebar-group-button,
+.fi-sidebar-group-collapse-btn {
+  min-height: 2.2rem !important;
+  padding: 0.35rem 0.65rem !important;
+}
+
+.fi-sidebar-group-items {
+  gap: 0.22rem !important;
+}
+
+.fi-sidebar-item {
+  margin-top: 0 !important;
+}
+
+.fi-sidebar-item > a,
+.fi-sidebar-item-button {
+  align-items: center !important;
+  border-radius: 0.72rem !important;
+  min-height: 2.45rem !important;
+  padding: 0.52rem 0.75rem !important;
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+.fi-sidebar-item-label,
+.fi-sidebar-item a span,
+.fi-sidebar-item-button span {
+  color: #4b5563 !important;
+  font-size: 0.92rem !important;
+  font-weight: 650 !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar-item-icon {
+  color: #6b7280 !important;
+  height: 1.18rem !important;
+  margin-top: 0 !important;
+  width: 1.18rem !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover,
+.fi-sidebar .fi-sidebar-item-button:hover {
+  background: #f4f6f8 !important;
+}
+
+.fi-sidebar .fi-sidebar-item > a:hover .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item > a:hover span,
+.fi-sidebar .fi-sidebar-item-button:hover span,
+.fi-sidebar .fi-sidebar-item > a:hover .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item-button:hover .fi-sidebar-item-icon {
+  color: #1f2937 !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active,
+.fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active > a,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item.fi-active > a {
+  background: #fee2e2 !important;
+  border-radius: 0.72rem !important;
+  box-shadow: inset 3px 0 0 #a91323 !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active > a:hover,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button:hover {
+  background: #fecaca !important;
+}
+
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item-active a span {
+  color: #991b1b !important;
+}

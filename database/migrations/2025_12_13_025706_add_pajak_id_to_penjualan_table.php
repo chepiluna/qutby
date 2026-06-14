@@ -9,20 +9,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('penjualan', function (Blueprint $table) {
-            // Kolom pajak_id sudah ada, di sini hanya tambahkan foreign key-nya
-            $table->foreign('pajak_id')
-                ->references('id')
-                ->on('pajak');
+            $table->foreignId('pajak_id')
+                ->nullable()
+                ->after('termin_id')
+                ->constrained('pajak');
         });
     }
 
     public function down(): void
     {
         Schema::table('penjualan', function (Blueprint $table) {
-            $table->dropForeign(['pajak_id']);
-            // Kalau kolom pajak_id memang dibuat di migration lain, baris ini boleh dihapus
-            // supaya tidak error waktu rollback.
-            // $table->dropColumn('pajak_id');
+            $table->dropConstrainedForeignId('pajak_id');
         });
     }
 };

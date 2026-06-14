@@ -13,20 +13,21 @@ use UnitEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class PenjualanResource extends Resource
 {
     protected static ?string $model = Penjualan::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-receipt';
 
     protected static UnitEnum|string|null $navigationGroup = 'Transaksi';
 
     protected static ?string $navigationLabel = 'Penjualan';
 
     protected static ?string $pluralModelLabel = 'Penjualan';
+
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'no_faktur';
 
@@ -98,7 +99,6 @@ class PenjualanResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'sales';
-        return Filament::getCurrentPanel()?->getId() === 'admin';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
     }
 }

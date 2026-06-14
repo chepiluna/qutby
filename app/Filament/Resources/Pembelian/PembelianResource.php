@@ -5,11 +5,12 @@ namespace App\Filament\Resources\Pembelian;
 use App\Filament\Resources\Pembelian\Pages;
 use App\Models\Pembelian;
 use App\Models\Barang;
-use App\Models\Vendor;
+use App\Models\Pajak;
 use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Actions as SchemaActions;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
@@ -23,7 +24,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Support\Icons\Heroicon;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 //use App\Filament\Traits\HasRoleAccess;
 use Illuminate\Support\HtmlString;
@@ -36,17 +37,17 @@ class PembelianResource extends Resource
     protected static array $allowedRoles = ['admin', 'operasional'];
     protected static ?string $model = Pembelian::class;
 
-    protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedShoppingCart;
+    protected static BackedEnum|string|null $navigationIcon = 'tabler-shopping-cart';
     protected static UnitEnum|string|null $navigationGroup = 'Transaksi';
 
     // ✅ FIX: ganti label menu utama
     protected static ?string $navigationLabel = 'Pesanan Pembelian';
 
     // (opsional) rapikan label plural
-    protected static ?string $pluralModelLabel = 'Daftar Pesanan Pembelian';
+    protected static ?string $pluralModelLabel = 'Pesanan Pembelian';
 
     // (opsional) urutan menu
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     /* =========================
      * FORM
@@ -83,27 +84,83 @@ class PembelianResource extends Resource
                             ->default('kredit')
                             ->live()
                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                $set('vendor_id', null);
+                                $set('vendor_manual', null);
+                                $set('use_vendor_manual', false);
+
                                 if ($state === 'tunai') {
                                     $set('termin', []);
                                     $set('jumlah_termin', null);
                                     return;
                                 }
 
-                                $set('jumlah_termin', $get('jumlah_termin') ?: 2);
+                                $set('jumlah_termin', $get('jumlah_termin') ?: '2');
                                 self::syncTerminRows($get, $set);
                             })
                             ->required(),
 
+                        Hidden::make('use_vendor_manual')
+                            ->default(false)
+                            ->afterStateHydrated(function (Get $get, Set $set): void {
+                                $set(
+                                    'use_vendor_manual',
+                                    $get('syarat_pembayaran') === 'tunai'
+                                    && filled($get('vendor_manual'))
+                                );
+                            })
+                            ->dehydrated(false),
+
                         Select::make('vendor_id')
                             ->label('Vendor')
+                            ->placeholder('Pilih vendor')
                             ->relationship('vendor', 'nama_vendor')
                             ->searchable()
-                            ->required()
+                            ->preload()
+                            ->required(fn (Get $get): bool => ! (
+                                $get('syarat_pembayaran') === 'tunai'
+                                && (bool) $get('use_vendor_manual')
+                            ))
+                            ->hidden(fn (Get $get): bool => $get('syarat_pembayaran') === 'tunai' && (bool) $get('use_vendor_manual'))
                             ->live()
                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                if (filled($state)) {
+                                    $set('vendor_manual', null);
+                                    $set('use_vendor_manual', false);
+                                }
+
                                 $set('diskon', 0);
                                 self::hitungTotal($get, $set);
                             }),
+
+                        SchemaActions::make([
+                            Action::make('use_manual_vendor')
+                                ->label('Vendor tidak terdaftar')
+                                ->color('gray')
+                                ->visible(fn (Get $get): bool =>
+                                    $get('syarat_pembayaran') === 'tunai'
+                                    && ! (bool) $get('use_vendor_manual')
+                                    && blank($get('vendor_id'))
+                                )
+                                ->action(function (Set $set): void {
+                                    $set('vendor_id', null);
+                                    $set('vendor_manual', null);
+                                    $set('use_vendor_manual', true);
+                                }),
+                        ]),
+
+                        TextInput::make('vendor_manual')
+                            ->label('Vendor')
+                            ->placeholder('Ketik nama vendor')
+                            ->visible(fn (Get $get): bool =>
+                                $get('syarat_pembayaran') === 'tunai'
+                                && (bool) $get('use_vendor_manual')
+                            )
+                            ->required(fn (Get $get): bool =>
+                                $get('syarat_pembayaran') === 'tunai'
+                                && (bool) $get('use_vendor_manual')
+                            )
+                            ->live()
+                            ->maxLength(255),
                     ]),
 
                 Section::make('Rincian Pembelian Barang')
@@ -184,7 +241,7 @@ class PembelianResource extends Resource
                             ->afterStateUpdated(fn (Get $get, Set $set) => self::hitungTotal($get, $set)),
 
                         Checkbox::make('ppn')
-                            ->label('PPN 11%')
+                            ->label(fn (): string => self::getPpnLabel())
                             ->default(true)
                             ->live()
                             ->afterStateUpdated(fn (Get $get, Set $set) => self::hitungTotal($get, $set)),
@@ -196,21 +253,22 @@ class PembelianResource extends Resource
                             ->dehydrated(),
                     ]),
 
-                Section::make(new HtmlString('Skema Pembayaran <span style="margin-left:8px; border-radius:999px; background:#EEEDFE; color:#6d28d9; padding:3px 9px; font-size:12px; font-weight:700;">Baru</span>'))
+                Section::make('Skema Pembayaran')
                     ->hidden(fn (Get $get): bool => $get('syarat_pembayaran') === 'tunai')
                     ->schema([
                         ToggleButtons::make('jumlah_termin')
                             ->label('Pilih Pembayaran')
                             ->options([
-                                2 => '2x Bayar',
-                                3 => '3x Bayar',
+                                '2' => '2x Bayar',
+                                '3' => '3x Bayar',
                             ])
                             ->inline()
                             ->live()
                             ->dehydrated(false)
-                            ->default(fn ($record): int => in_array($record?->poTermins()->count(), [2, 3], true)
-                                ? $record->poTermins()->count()
-                                : 2)
+                            ->default(fn ($record): string => in_array($record?->poTermins()->count(), [2, 3], true)
+                                ? (string) $record->poTermins()->count()
+                                : '2')
+                            ->required()
                             ->extraAttributes(['class' => 'po-termin-toggle'])
                             ->afterStateHydrated(fn (Set $set, Get $get) => self::syncTerminRows($get, $set))
                             ->afterStateUpdated(fn (Set $set, Get $get) => self::syncTerminRows($get, $set)),
@@ -236,7 +294,7 @@ class PembelianResource extends Resource
                                     )),
 
                                 DatePicker::make('due_date')
-                                    ->label('TANGGAL JATUH TEMPO')
+                                    ->label('TANGGAL PEMBAYARAN')
                                     ->disabled()
                                     ->dehydrated()
                                     ->required(),
@@ -294,7 +352,7 @@ class PembelianResource extends Resource
 
         // 4. PPN (Rp) = Setelah Diskon × 11% (jika aktif)
         $ppnAktif = (bool) ($get($prefix . 'ppn') ?? false);
-        $ppnRp    = $ppnAktif ? $setelahDiskon * 0.11 : 0;
+        $ppnRp    = $ppnAktif ? $setelahDiskon * (self::getPpnPersen() / 100) : 0;
 
         // 5. Total Akhir = Setelah Diskon + PPN (Rp)
         $totalAkhir = $setelahDiskon + $ppnRp;
@@ -309,6 +367,27 @@ class PembelianResource extends Resource
     protected static function hitungTotal(Get $get, Set $set): void
     {
         self::recalculate($get, $set, '');
+    }
+
+    protected static function getPpnPajak(): ?Pajak
+    {
+        return Pajak::query()
+            ->where('kode', 'PPN')
+            ->first();
+    }
+
+    protected static function getPpnPersen(): float
+    {
+        return (float) (self::getPpnPajak()?->persen ?? 0);
+    }
+
+    protected static function getPpnLabel(): string
+    {
+        $pajak = self::getPpnPajak();
+
+        return $pajak
+            ? $pajak->kode . ' ' . number_format((float) $pajak->persen, 0) . '%'
+            : 'PPN';
     }
 
     /** Dipanggil dari dalam repeater item (barang, qty, harga) */
@@ -335,7 +414,7 @@ class PembelianResource extends Resource
 
         if (! in_array($count, [2, 3], true)) {
             $count = 2;
-            $set($prefix . 'jumlah_termin', $count);
+            $set($prefix . 'jumlah_termin', (string) $count);
         }
 
         $totalAkhir = (float) ($get($prefix . 'total_akhir') ?? 0);
@@ -401,7 +480,13 @@ class PembelianResource extends Resource
             ->columns([
                 TextColumn::make('tanggal')->label('Tanggal PO')->date()->sortable(),
                 TextColumn::make('nomor')->label('No. PO')->searchable(),
-                TextColumn::make('vendor.nama_vendor')->label('Vendor')->searchable(),
+                TextColumn::make('vendor_display_name')
+                    ->label('Vendor')
+                    ->getStateUsing(fn (Pembelian $record): string => $record->vendor_manual ?: ($record->vendor?->nama_vendor ?? '-'))
+                    ->searchable(query: function ($query, string $search) {
+                        $query->where('vendor_manual', 'like', "%{$search}%")
+                            ->orWhereHas('vendor', fn ($vendorQuery) => $vendorQuery->where('nama_vendor', 'like', "%{$search}%"));
+                    }),
                 TextColumn::make('total_akhir')
                     ->label('Total PO')
                     ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state ?? 0, 0, ',', '.'))
@@ -435,6 +520,6 @@ class PembelianResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'sales';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
     }
 }
