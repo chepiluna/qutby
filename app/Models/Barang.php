@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 // tambahan
 use Illuminate\Support\Facades\DB;
 
-class barang extends Model
+class Barang extends Model
 {
     use HasFactory;
 
@@ -54,4 +54,3 @@ class barang extends Model
     }
 
 }
-

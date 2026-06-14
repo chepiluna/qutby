@@ -55,6 +55,7 @@ class PenjualanForm
 
                         Select::make('pelanggan_id')
                             ->label('Pelanggan')
+                            ->placeholder('Pilih pelanggan')
                             ->relationship('pelanggan', 'nama_pelanggan')
                             ->searchable()
                             ->preload()
@@ -67,6 +68,7 @@ class PenjualanForm
 
                         Select::make('cara_bayar')
                             ->label('Cara bayar')
+                            ->placeholder('Pilih cara bayar')
                             ->options([
                                 'tunai'  => 'Tunai',
                                 'kredit' => 'Kredit',
@@ -83,6 +85,7 @@ class PenjualanForm
 
                         Select::make('metode_bayar')
                             ->label('Metode Bayar')
+                            ->placeholder('Pilih metode bayar')
                             ->options([
                                 'cash' => 'Cash',
                                 'transfer' => 'Transfer',
@@ -99,6 +102,7 @@ class PenjualanForm
 
                         Select::make('akun_kas_id')
                             ->label('Kas / Bank')
+                            ->placeholder('Pilih kas / bank')
                             ->relationship(
                                 name: 'akunKas',
                                 titleAttribute: 'nama_akun',
@@ -122,6 +126,7 @@ class PenjualanForm
 
                         Select::make('termin_id')
                             ->label('Syarat pembayaran')
+                            ->placeholder('Pilih syarat pembayaran')
                             ->relationship('termin', 'nama')
                             ->visible(
                                 fn($get) =>
@@ -138,12 +143,13 @@ class PenjualanForm
                     ->columns(2)
                     ->columnSpanFull(),
 
-                Section::make('Detail Penjualan')
+                Section::make('Rincian Penjualan Barang')
                     ->schema([
 
                         Repeater::make('detail')
-                            ->label('')
+                            ->label('Rincian Barang')
                             ->relationship('detail')
+                            ->addActionLabel('Tambah barang')
                             ->columns(4)
                             ->defaultItems(1)
                             ->required()
@@ -294,7 +300,7 @@ class PenjualanForm
                     ])
                     ->columnSpanFull(),
 
-                Section::make('Ringkasan')
+                Section::make('Perhitungan Total')
                     ->schema([
 
                         TextInput::make('total_bruto')

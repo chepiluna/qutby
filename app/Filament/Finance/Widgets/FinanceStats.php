@@ -16,28 +16,24 @@ class FinanceStats extends BaseWidget
 
     protected function getStats(): array
     {
-        $bulan = now()->month;
-        $tahun = now()->year;
+        $start = now()->startOfMonth();
+        $end = now()->endOfMonth();
 
         $totalPembayaran = Pembayaran::query()
-            ->whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
+            ->whereBetween('created_at', [$start, $end])
             ->select(DB::raw('SUM(jumlah_bayar - COALESCE(diskon_termin,0)) as total'))
             ->value('total');
 
         $totalPengeluaran = Pengeluaran::query()
-            ->whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
+            ->whereBetween('created_at', [$start, $end])
             ->sum('jumlah');
 
         $totalPenjualan = Penjualan::query()
-            ->whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
+            ->whereBetween('created_at', [$start, $end])
             ->sum('total_netto');
 
         $totalHpp = Penjualan::query()
-            ->whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
+            ->whereBetween('created_at', [$start, $end])
             ->sum('total_hpp');
 
         $labaKotor = $totalPenjualan - $totalHpp;

@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Finance\Widgets\Cashflow30DaysChart;
 use App\Filament\Finance\Widgets\FinanceStats;
+use App\Filament\Finance\Widgets\VendorPaymentDueWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -31,6 +32,8 @@ class FinancePanelProvider extends PanelProvider
             ->path('finance')
             ->authGuard('web')
             ->login(CustomLogin::class)
+            ->globalSearch(false)
+            ->databaseNotifications()
             ->navigationGroups([
                 'Master Data',
                 'Transaksi',
@@ -38,20 +41,15 @@ class FinancePanelProvider extends PanelProvider
             ])
             ->brandName('QUTRIX')
             ->brandLogo(asset('images/logoqutby.png'))
-            ->brandLogoHeight('3rem')
+            ->brandLogoHeight('2.6rem')
             ->viteTheme('resources/css/filament/finance/theme.css')
             ->colors([
                 'primary' => Color::Emerald,
             ])
             ->maxContentWidth(Width::Full)
             ->renderHook(
-                PanelsRenderHook::HEAD_END,
-                fn () => '<style>
-                    .fi-topbar { background: linear-gradient(90deg, #7f1d1d, #b91c1c) !important; }
-                    .fi-topbar .fi-logo,
-                    .fi-topbar .fi-logo *,
-                    .fi-topbar-brand-text { color: white !important; }
-                </style>'
+                PanelsRenderHook::TOPBAR_LOGO_BEFORE,
+                fn () => view('filament.finance.partials.qutrix-brand'),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -61,6 +59,7 @@ class FinancePanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Finance/Widgets'), for: 'App\\Filament\\Finance\\Widgets')
             ->widgets([
                 FinanceStats::class,
+                VendorPaymentDueWidget::class,
                 Cashflow30DaysChart::class,
             ])
             ->middleware([

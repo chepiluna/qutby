@@ -94,7 +94,7 @@ class CustomLogin extends Login
             public function toResponse($request): RedirectResponse | Redirector
             {
                 return redirect()->to(match ($this->panelId) {
-                    'sales' => URL::to('/sales'),
+                    'sales' => URL::to('/operasional'),
                     'finance' => URL::to('/finance'),
                     default => Filament::getUrl(),
                 });

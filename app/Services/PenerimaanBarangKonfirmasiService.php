@@ -100,7 +100,7 @@ class PenerimaanBarangKonfirmasiService
 
             /**
              * =========================
-             * UPDATE STATUS GRN
+             * UPDATE STATUS PENERIMAAN BARANG
              * =========================
              */
             $PenerimaanBarang->update([

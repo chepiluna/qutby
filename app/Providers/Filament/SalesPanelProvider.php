@@ -28,36 +28,24 @@ class SalesPanelProvider extends PanelProvider
     {
         return $panel
             ->id('sales')
-            ->path('sales')
+            ->path('operasional')
             ->authGuard('web')
             ->login(CustomLogin::class)
+            ->globalSearch(false)
+            ->databaseNotifications()
             ->navigationGroups([
                 'Master Data',
                 'Transaksi',
                 'Laporan',
                 'Pengaturan', 
             ])
-            
             ->brandName('QUTRIX')
             ->brandLogo(asset('images/logoqutby.png'))
-            ->brandLogoHeight('3rem')
+            ->brandLogoHeight('2.6rem')
             ->viteTheme('resources/css/filament/sales/theme.css')
             ->colors([
                 'primary' => Color::Amber,
             ]) // ← TUTUP colors di sini
-            ->renderHook(
-                PanelsRenderHook::HEAD_END,
-                fn () => '<style>
-                    .fi-topbar {
-                        background: linear-gradient(90deg, #6b0f0f, #e0490d);
-                    }
-                    .fi-topbar .fi-logo,
-                    .fi-topbar .fi-logo *,
-                    .fi-topbar-brand-text {
-                        color: white !important;
-                    }
-                </style>'
-            )
 
             // Ambil resource/page/widget default (admin)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

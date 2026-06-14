@@ -24,7 +24,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Validation\Rule;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
@@ -42,7 +41,7 @@ class PenerimaanBarangResource extends Resource
     protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
     protected static UnitEnum|string|null   $navigationGroup = 'Transaksi';
     protected static ?string $navigationLabel = 'Penerimaan Barang';
-    protected static ?string $pluralModelLabel = 'Daftar Penerimaan Barang';
+    protected static ?string $pluralModelLabel = 'Penerimaan Barang';
     protected static ?int    $navigationSort = 2;
 
     public static function getNavigationBadge(): ?string
@@ -73,16 +72,10 @@ class PenerimaanBarangResource extends Resource
                         ->dehydrated(),
 
                     Select::make('pembelian_id')
-                        ->label('Pesanan Pembelian')
-                        ->options(
-                            Pembelian::with('vendor')
-                                ->whereIn('status', ['menunggu', 'partial'])
-                                ->get()
-                                ->mapWithKeys(fn (Pembelian $po) => [
-                                    $po->id => "{$po->nomor} - {$po->vendor?->nama_vendor}",
-                                ])
-                        )
+                        ->label('PO Terkait')
+                        ->options(fn (): array => self::getAvailablePembelianOptions())
                         ->searchable()
+                        ->preload()
                         ->required()
                         ->default(fn () => request()->query('pembelian_id'))
                         ->rules([
@@ -98,8 +91,15 @@ class PenerimaanBarangResource extends Resource
                     Select::make('vendor_id')
                         ->label('Vendor')
                         ->relationship('vendor', 'nama_vendor')
+                        ->hidden(fn (Get $get): bool => filled($get('vendor_manual')))
                         ->disabled()
                         ->dehydrated(),
+
+                    TextInput::make('vendor_manual')
+                        ->label('Vendor')
+                        ->hidden(fn (Get $get): bool => blank($get('vendor_manual')))
+                        ->disabled()
+                        ->dehydrated(false),
 
                     DatePicker::make('tanggal_terima')
                         ->label('Tanggal Terima')
@@ -126,12 +126,11 @@ class PenerimaanBarangResource extends Resource
                         )),
                 ]),
 
-            Section::make('Detail Penerimaan Per Item')
-                ->description('Isi qty aktual dan kondisi tiap barang yang diterima.')
+            Section::make('Rincian Barang Diterima')
                 ->schema([
                     Repeater::make('details')
                         ->relationship('details')
-                        ->label('')
+                        ->label('Barang yang diterima')
                         ->addable(false)
                         ->deletable(false)
                         ->reorderable(false)
@@ -244,6 +243,22 @@ class PenerimaanBarangResource extends Resource
             ->toArray();
     }
 
+    protected static function getAvailablePembelianOptions(): array
+    {
+        return Pembelian::with(['vendor', 'details.penerimaanBarangDetails.penerimaanBarang'])
+            ->whereIn('status', ['menunggu', 'partial'])
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id')
+            ->get()
+            ->filter(fn (Pembelian $po): bool => $po->details->contains(
+                fn (PembelianDetail $detail): bool => $detail->qty_outstanding > 0
+            ))
+            ->mapWithKeys(fn (Pembelian $po): array => [
+                $po->id => $po->nomor . ' - ' . ($po->vendor_manual ?: ($po->vendor?->nama_vendor ?? '-')),
+            ])
+            ->all();
+    }
+
     protected static function fillFromPembelian(Set $set, mixed $pembelianId): void
     {
         $po = Pembelian::with(['vendor', 'details.barang', 'details.penerimaanBarangDetails.penerimaanBarang'])
@@ -256,8 +271,18 @@ class PenerimaanBarangResource extends Resource
             return;
         }
 
+        $items = self::getOpenPenerimaanBarangItems($po);
+
+        if ($items === []) {
+            $set('vendor_id', null);
+            $set('vendor_manual', null);
+            $set('details', []);
+            return;
+        }
+
         $set('vendor_id', $po->vendor_id);
-        $set('details', self::getOpenPenerimaanBarangItems($po));
+        $set('vendor_manual', $po->vendor_manual);
+        $set('details', $items);
         $set('nomor_grn', PenerimaanBarang::generateNomor((int) $po->id));
     }
 
@@ -399,8 +424,13 @@ class PenerimaanBarangResource extends Resource
                     ->label('No. PO')
                     ->searchable(),
 
-                TextColumn::make('vendor.nama_vendor')
-                    ->label('Vendor'),
+                TextColumn::make('vendor_display_name')
+                    ->label('Vendor')
+                    ->getStateUsing(fn (PenerimaanBarang $record): string => $record->pembelian?->vendor_manual ?: ($record->vendor?->nama_vendor ?? '-'))
+                    ->searchable(query: function ($query, string $search) {
+                        $query->whereHas('vendor', fn ($vendorQuery) => $vendorQuery->where('nama_vendor', 'like', "%{$search}%"))
+                            ->orWhereHas('pembelian', fn ($pembelianQuery) => $pembelianQuery->where('vendor_manual', 'like', "%{$search}%"));
+                    }),
 
                 TextColumn::make('tanggal_terima')
                     ->label('Tgl. Terima')
@@ -412,13 +442,7 @@ class PenerimaanBarangResource extends Resource
                     ->searchable()
                     ->placeholder('-'),
             ])
-            ->filters([
-                SelectFilter::make('status')
-                    ->options([
-                        'draft'        => 'Draft',
-                        'dikonfirmasi' => 'Diterima',
-                    ]),
-            ])
+            ->filters([])
             ->recordActions([
                 ViewAction::make()->label('Detail'),
             ])
@@ -442,6 +466,6 @@ class PenerimaanBarangResource extends Resource
     }
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'sales';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
     }
 }

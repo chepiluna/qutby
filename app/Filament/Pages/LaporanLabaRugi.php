@@ -9,6 +9,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Carbon;
@@ -46,34 +47,36 @@ class LaporanLabaRugi extends Page implements HasForms
     {
         return $schema
             ->components([
-                Select::make('mode')
-                    ->label('Periode')
-                    ->options([
-                        'bulanan' => 'Bulanan',
-                        'tahunan' => 'Tahunan',
-                    ])
-                    ->live()
-                    ->required(),
+                Grid::make(3)->schema([
+                    Select::make('mode')
+                        ->label('Periode')
+                        ->options([
+                            'bulanan' => 'Bulanan',
+                            'tahunan' => 'Tahunan',
+                        ])
+                        ->live()
+                        ->required(),
 
-                Select::make('bulan')
-                    ->label('Bulan')
-                    ->visible(fn ($get) => $get('mode') === 'bulanan')
-                    ->options([
-                        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-                    ])
-                    ->required(fn ($get) => $get('mode') === 'bulanan'),
+                    Select::make('bulan')
+                        ->label('Bulan')
+                        ->visible(fn ($get) => $get('mode') === 'bulanan')
+                        ->options([
+                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+                        ])
+                        ->required(fn ($get) => $get('mode') === 'bulanan'),
 
-                Select::make('tahun')
-                    ->label('Tahun')
-                    ->options(function () {
-                        $y = now()->year;
-                        return collect(range($y - 5, $y + 1))
-                            ->mapWithKeys(fn ($v) => [$v => (string) $v])
-                            ->all();
-                    })
-                    ->required(),
+                    Select::make('tahun')
+                        ->label('Tahun')
+                        ->options(function () {
+                            $y = now()->year;
+                            return collect(range($y - 5, $y + 1))
+                                ->mapWithKeys(fn ($v) => [$v => (string) $v])
+                                ->all();
+                        })
+                        ->required(),
+                ]),
             ])
             ->statePath('data');
     }
@@ -222,6 +225,6 @@ class LaporanLabaRugi extends Page implements HasForms
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()?->getId() === 'finance';
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'finance'], true);
     }
 }
