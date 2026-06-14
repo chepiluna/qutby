@@ -52,11 +52,13 @@ class PembelianForm
 
                     DatePicker::make('tanggal')
                         ->default(now())
-                        ->required(),
+                        ->live()
+                        ->required()
+                        ->afterStateUpdated(fn (Set $set, $state) => $set('nomor', \App\Models\Pembelian::generateNomorPembelian($state))),
 
                     TextInput::make('nomor')
                         ->label('Nomor Pembelian')
-                        ->default(fn () => \App\Models\Pembelian::generateNomorPembelian())
+                        ->default(fn (Get $get) => \App\Models\Pembelian::generateNomorPembelian($get('tanggal') ?: now()))
                         ->disabled()
                         ->dehydrated()
                         ->required(),

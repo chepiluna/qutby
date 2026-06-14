@@ -126,6 +126,6 @@ class LaporanPiutangPelanggan extends Page implements HasForms
 
     public static function shouldRegisterNavigation(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'operasional'], true);
     }
 }

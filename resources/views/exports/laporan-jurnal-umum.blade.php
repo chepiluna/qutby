@@ -29,13 +29,13 @@
         }
 
         .header h1 {
-            font-size: 16px;
+            font-size: 12px;
             margin: 0;
             font-weight: bold;
         }
 
         .header h2 {
-            font-size: 13px;
+            font-size: 18px;
             margin: 4px 0;
             font-weight: bold;
         }
@@ -74,8 +74,8 @@
 
     {{-- HEADER LAPORAN --}}
     <div class="header text-center">
+        <h2>CV.QUTBY CREATIVINDO</h2>
         <h1>LAPORAN JURNAL UMUM</h1>
-        <h2>QUTBY COLLECTION</h2>
         <p>Periode: {{ $periode ?? 'Semua Periode' }}</p>
     </div>
 

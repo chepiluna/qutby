@@ -59,26 +59,14 @@ return new class extends Migration
             });
         }
 
-        if (! Schema::hasTable('po_termins')) {
-            Schema::create('po_termins', function (Blueprint $table) {
+        if (! Schema::hasTable('penerimaan_barangs')) {
+            Schema::create('penerimaan_barangs', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('pembelian_id')->constrained('pembelians')->cascadeOnDelete();
-                $table->integer('termin_ke')->default(1);
-                $table->date('due_date')->nullable();
-                $table->decimal('nominal', 15, 2)->default(0);
-                $table->string('status')->default('belum_lunas');
-                $table->date('tanggal_bayar')->nullable();
-                $table->timestamps();
-            });
-        }
-
-        if (! Schema::hasTable('grns')) {
-            Schema::create('grns', function (Blueprint $table) {
-                $table->id();
-                $table->string('nomor_grn')->unique();
+                $table->string('id_penerimaan')->unique();
                 $table->foreignId('pembelian_id')->nullable()->constrained('pembelians')->nullOnDelete();
                 $table->foreignId('vendor_id')->nullable()->constrained('vendors')->nullOnDelete();
                 $table->date('tanggal_terima');
+                $table->string('nomor_faktur')->nullable();
                 $table->string('nomor_surat_jalan')->nullable();
                 $table->string('gudang_tujuan')->nullable();
                 $table->text('catatan')->nullable();
@@ -90,10 +78,10 @@ return new class extends Migration
             });
         }
 
-        if (! Schema::hasTable('grn_details')) {
-            Schema::create('grn_details', function (Blueprint $table) {
+        if (! Schema::hasTable('penerimaan_barang_details')) {
+            Schema::create('penerimaan_barang_details', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('grn_id')->constrained('grns')->cascadeOnDelete();
+                $table->foreignId('grn_id')->constrained('penerimaan_barangs')->cascadeOnDelete();
                 $table->foreignId('pembelian_detail_id')->nullable()->constrained('pembelian_details')->nullOnDelete();
                 $table->foreignId('barang_id')->nullable()->constrained('barang')->nullOnDelete();
                 $table->integer('qty_po')->default(0);
@@ -110,9 +98,7 @@ return new class extends Migration
             Schema::create('faktur_pembelians', function (Blueprint $table) {
                 $table->id();
                 $table->date('tanggal_faktur')->nullable();
-                $table->date('tanggal_pembayaran')->nullable();
                 $table->string('nomor_faktur_vendor')->nullable();
-                $table->string('nomor_pembayaran_vendor')->nullable();
                 $table->foreignId('pembelian_id')->nullable()->constrained('pembelians')->nullOnDelete();
                 $table->foreignId('vendor_id')->nullable()->constrained('vendors')->nullOnDelete();
                 $table->decimal('total_bruto', 15, 2)->default(0);
@@ -190,9 +176,8 @@ return new class extends Migration
             'kartu_stok',
             'faktur_pembelian_details',
             'faktur_pembelians',
-            'grn_details',
-            'grns',
-            'po_termins',
+            'penerimaan_barang_details',
+            'penerimaan_barangs',
             'pembelian_details',
             'pembelians',
             'vendors',

@@ -3,12 +3,11 @@
         $data = $this->getDashboardData();
         $fmtRp = fn (float|int $value): string => 'Rp ' . number_format((float) $value, 0, ',', '.');
         $fmtQty = fn (float|int $value): string => number_format((float) $value, 0, ',', '.');
-        $chartId = 'sales-purchase-trend-' . $this->getId();
-        $donutId = 'sales-payment-donut-' . $this->getId();
         $trend = $data['trend'];
         $sales = $data['sales'];
         $purchases = $data['purchases'];
         $grossProfit = $data['grossProfit'];
+        $trendMax = max(1, ...array_map('floatval', $trend['sales']), ...array_map('floatval', $trend['purchases']));
     @endphp
 
     <style>
@@ -329,6 +328,32 @@
             width: 100%;
         }
 
+        .ops-donut {
+            align-items: center;
+            aspect-ratio: 1;
+            background:
+                radial-gradient(circle at center, var(--dash-surface) 0 58%, transparent 59%),
+                conic-gradient(#fbbf24 0 calc(var(--cash-percent) * 1%), var(--dash-sale) 0 100%);
+            border-radius: 999px;
+            display: grid;
+            justify-items: center;
+            width: 100%;
+        }
+
+        .ops-donut__center {
+            color: var(--dash-ink);
+            display: grid;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .ops-donut__center strong {
+            font-size: 22px;
+            font-weight: 950;
+        }
+
         .ops-legend {
             display: grid;
             gap: 8px;
@@ -376,6 +401,52 @@
             height: 360px;
             position: relative;
             width: 100%;
+        }
+
+        .ops-trend {
+            align-items: end;
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(30, minmax(12px, 1fr));
+            height: 100%;
+            overflow-x: auto;
+            padding: 10px 0 24px;
+        }
+
+        .ops-trend__day {
+            align-items: end;
+            display: grid;
+            gap: 4px;
+            grid-template-columns: 1fr 1fr;
+            height: 100%;
+            min-width: 16px;
+            position: relative;
+        }
+
+        .ops-trend__bar {
+            border-radius: 4px 4px 0 0;
+            min-height: 2px;
+        }
+
+        .ops-trend__bar--sale {
+            background: var(--dash-sale);
+            height: max(2px, calc(var(--sale-height) * 1%));
+        }
+
+        .ops-trend__bar--buy {
+            background: var(--dash-buy);
+            height: max(2px, calc(var(--buy-height) * 1%));
+        }
+
+        .ops-trend__label {
+            bottom: -20px;
+            color: var(--dash-muted);
+            font-size: 10px;
+            font-weight: 800;
+            left: 50%;
+            position: absolute;
+            transform: translateX(-50%);
+            white-space: nowrap;
         }
 
         .ops-chart-legend {
@@ -577,7 +648,12 @@
                 </div>
                 <div class="ops-donut-box">
                     <div class="ops-donut-frame">
-                        <canvas id="{{ $donutId }}"></canvas>
+                        <div class="ops-donut" style="--cash-percent: {{ $sales['cashPercent'] }};">
+                            <div class="ops-donut__center">
+                                <strong>{{ $sales['cashPercent'] }}%</strong>
+                                <span>Tunai</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="ops-legend">
                         <div class="ops-legend__item">
@@ -638,7 +714,25 @@
                 </div>
             </div>
             <div class="ops-chart-frame">
-                <canvas id="{{ $chartId }}"></canvas>
+                <div class="ops-trend" role="img" aria-label="Tren penjualan dan pembelian 30 hari terakhir">
+                    @foreach ($trend['labels'] as $index => $label)
+                        @php
+                            $saleHeight = ((float) ($trend['sales'][$index] ?? 0) / $trendMax) * 100;
+                            $buyHeight = ((float) ($trend['purchases'][$index] ?? 0) / $trendMax) * 100;
+                        @endphp
+                        <div
+                            class="ops-trend__day"
+                            title="{{ $label }} - Penjualan {{ $fmtRp($trend['sales'][$index] ?? 0) }}, Pembelian {{ $fmtRp($trend['purchases'][$index] ?? 0) }}"
+                            style="--sale-height: {{ $saleHeight }}; --buy-height: {{ $buyHeight }};"
+                        >
+                            <span class="ops-trend__bar ops-trend__bar--sale"></span>
+                            <span class="ops-trend__bar ops-trend__bar--buy"></span>
+                            @if ($loop->first || $loop->iteration % 5 === 0 || $loop->last)
+                                <span class="ops-trend__label">{{ $label }}</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
             </div>
             <div class="ops-chart-legend">
                 <div class="ops-legend__item"><span class="ops-dot ops-dot--sale"></span><span>Penjualan</span></div>
@@ -646,116 +740,4 @@
             </div>
         </section>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <script>
-        (() => {
-            const rupiah = (value) => {
-                const number = Number(value || 0);
-
-                if (Math.abs(number) >= 1_000_000) {
-                    return `Rp ${(number / 1_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })}jt`;
-                }
-
-                if (Math.abs(number) >= 1_000) {
-                    return `Rp ${(number / 1_000).toLocaleString('id-ID', { maximumFractionDigits: 0 })}k`;
-                }
-
-                return `Rp ${number.toLocaleString('id-ID')}`;
-            };
-
-            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--dash-ink').trim() || '#0f172a';
-            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--dash-line').trim() || '#d9dee8';
-            const saleColor = '#D85A30';
-            const buyColor = '#185FA5';
-
-            const donutCanvas = document.getElementById(@js($donutId));
-            const trendCanvas = document.getElementById(@js($chartId));
-
-            if (donutCanvas && window.Chart) {
-                new Chart(donutCanvas, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Tunai', 'Kredit'],
-                        datasets: [{
-                            data: [@json($sales['cash']), @json($sales['credit'])],
-                            backgroundColor: ['#fbbf24', saleColor],
-                            borderColor: 'transparent',
-                            hoverOffset: 3,
-                        }],
-                    },
-                    options: {
-                        cutout: '64%',
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => `${context.label}: ${rupiah(context.raw)}`,
-                                },
-                            },
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                    },
-                });
-            }
-
-            if (trendCanvas && window.Chart) {
-                new Chart(trendCanvas, {
-                    type: 'bar',
-                    data: {
-                        labels: @json($trend['labels']),
-                        datasets: [
-                            {
-                                label: 'Penjualan',
-                                data: @json($trend['sales']),
-                                backgroundColor: saleColor,
-                                borderRadius: 4,
-                                maxBarThickness: 18,
-                            },
-                            {
-                                label: 'Pembelian',
-                                data: @json($trend['purchases']),
-                                backgroundColor: buyColor,
-                                borderRadius: 4,
-                                maxBarThickness: 18,
-                            },
-                        ],
-                    },
-                    options: {
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => `${context.dataset.label}: ${rupiah(context.raw)}`,
-                                },
-                            },
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: {
-                                    color: textColor,
-                                    maxRotation: 0,
-                                    minRotation: 0,
-                                    autoSkip: true,
-                                    maxTicksLimit: 10,
-                                },
-                            },
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: gridColor },
-                                ticks: {
-                                    color: textColor,
-                                    callback: (value) => rupiah(value),
-                                },
-                            },
-                        },
-                    },
-                });
-            }
-        })();
-    </script>
 </x-filament-panels::page>

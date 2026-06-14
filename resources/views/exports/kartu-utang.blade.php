@@ -68,7 +68,7 @@
 <body>
     <div class="header">
         <h1>KARTU UTANG</h1>
-        <div class="company">CV QUTBY COLLECTION</div>
+        <div class="company">CV.QUTBY CREATIVINDO</div>
         <div class="meta"><strong>Nama Kreditor:</strong> {{ $vendor->nama_vendor }}</div>
         <div class="meta"><strong>Nomer Rekening:</strong> {{ $nomorRekening }}</div>
         <div class="meta"><strong>Periode:</strong> {{ $periode }}</div>

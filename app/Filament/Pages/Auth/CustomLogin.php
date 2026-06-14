@@ -79,7 +79,7 @@ class CustomLogin extends Login
                 return false;
             }
 
-            return in_array($this->getPanelIdForUser($user), ['sales', 'finance'], true);
+            return in_array($this->getPanelIdForUser($user), ['operasional', 'finance'], true);
         }, $data['remember'] ?? false)) {
             $this->fireFailedEvent($authGuard, $user, $credentials);
             $this->throwFailureValidationException();
@@ -94,7 +94,7 @@ class CustomLogin extends Login
             public function toResponse($request): RedirectResponse | Redirector
             {
                 return redirect()->to(match ($this->panelId) {
-                    'sales' => URL::to('/operasional'),
+                    'operasional' => URL::to('/operasional'),
                     'finance' => URL::to('/finance'),
                     default => Filament::getUrl(),
                 });
@@ -105,7 +105,7 @@ class CustomLogin extends Login
     protected function getPanelIdForUser(?Authenticatable $user): ?string
     {
         return match ($user?->role ?? null) {
-            'sales' => 'sales',
+            'operasional' => 'operasional',
             'finance' => 'finance',
             default => null,
         };

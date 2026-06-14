@@ -14,6 +14,7 @@ use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Model;
 
 class BarangResource extends Resource
 {
@@ -63,13 +64,13 @@ class BarangResource extends Resource
         return false;
     }
 
-    public static function canDelete($record): bool
+    public static function canDelete(Model $record): bool
     {
-        return false;
+        return $record instanceof Barang;
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'operasional'], true);
     }
 }

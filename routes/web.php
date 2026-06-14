@@ -81,7 +81,7 @@ Route::get('/kartu-utang/pdf', function () {
 })->name('kartu-utang.pdf')->middleware('web');
 
 Route::get('/laporan-pembelian/pdf', function () {
-    abort_unless(Auth::check() && in_array(Auth::user()?->role, ['admin', 'finance', 'operasional', 'sales'], true), 403);
+    abort_unless(Auth::check() && in_array(Auth::user()?->role, ['admin', 'finance', 'operasional'], true), 403);
 
     $bulan = request('bulan', now()->format('m'));
     $tahun = request('tahun', now()->format('Y'));
@@ -98,7 +98,7 @@ Route::get('/laporan-pembelian/pdf', function () {
 })->name('laporan-pembelian.pdf')->middleware('web');
 
 Route::get('/laporan-pembelian/excel', function () {
-    abort_unless(Auth::check() && in_array(Auth::user()?->role, ['admin', 'finance', 'operasional', 'sales'], true), 403);
+    abort_unless(Auth::check() && in_array(Auth::user()?->role, ['admin', 'finance', 'operasional'], true), 403);
 
     $bulan = request('bulan', now()->format('m'));
     $tahun = request('tahun', now()->format('Y'));

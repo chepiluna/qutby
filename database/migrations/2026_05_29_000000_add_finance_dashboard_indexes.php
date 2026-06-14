@@ -22,16 +22,20 @@ return new class extends Migration
             $table->index('created_at', 'penjualan_created_at_index');
         });
 
-        Schema::table('po_termins', function (Blueprint $table) {
-            $table->index(['status', 'due_date'], 'po_termins_status_due_date_index');
-        });
+        if (Schema::hasTable('po_termins')) {
+            Schema::table('po_termins', function (Blueprint $table) {
+                $table->index(['status', 'due_date'], 'po_termins_status_due_date_index');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('po_termins', function (Blueprint $table) {
-            $table->dropIndex('po_termins_status_due_date_index');
-        });
+        if (Schema::hasTable('po_termins')) {
+            Schema::table('po_termins', function (Blueprint $table) {
+                $table->dropIndex('po_termins_status_due_date_index');
+            });
+        }
 
         Schema::table('penjualan', function (Blueprint $table) {
             $table->dropIndex('penjualan_created_at_index');

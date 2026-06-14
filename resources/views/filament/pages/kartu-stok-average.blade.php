@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="text-sm font-semibold text-gray-900 dark:text-gray-200">
-                    CV QUTBY COLLECTION
+                    CV.QUTBY CREATIVINDO
                 </div>
 
                 <div class="text-sm text-gray-600 dark:text-gray-400">

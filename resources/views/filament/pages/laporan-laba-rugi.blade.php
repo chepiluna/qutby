@@ -46,11 +46,11 @@
 
                 {{-- HEADER --}}
                 <div class="text-center mb-6 space-y-1">
+                    <div class="text-base font-semibold">
+                        CV.QUTBY CREATIVINDO
+                    </div>
                     <div class="text-lg font-bold tracking-wide">
                         LAPORAN LABA RUGI
-                    </div>
-                    <div class="text-base font-semibold">
-                        CV QUTBY COLLECTION
                     </div>
                     <div class="text-sm text-gray-600">
                         PERIODE {{ $this->report['periode']['start'] ?? '-' }} s/d {{ $this->report['periode']['end'] ?? '-' }}

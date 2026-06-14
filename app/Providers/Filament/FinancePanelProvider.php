@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Finance\Widgets\Cashflow30DaysChart;
 use App\Filament\Finance\Widgets\FinanceStats;
+use App\Filament\Finance\Widgets\MonthlyProfitChart;
 use App\Filament\Finance\Widgets\VendorPaymentDueWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -56,11 +57,11 @@ class FinancePanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->discoverResources(in: app_path('Filament/Finance/Resources'), for: 'App\\Filament\\Finance\\Resources')
             ->discoverPages(in: app_path('Filament/Finance/Pages'), for: 'App\\Filament\\Finance\\Pages')
-            ->discoverWidgets(in: app_path('Filament/Finance/Widgets'), for: 'App\\Filament\\Finance\\Widgets')
             ->widgets([
                 FinanceStats::class,
                 VendorPaymentDueWidget::class,
                 Cashflow30DaysChart::class,
+                MonthlyProfitChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

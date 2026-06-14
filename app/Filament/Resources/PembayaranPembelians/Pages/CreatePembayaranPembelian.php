@@ -20,6 +20,11 @@ class CreatePembayaranPembelian extends CreateRecord
         return 'Tambah Pembayaran Utang';
     }
 
+    public function getBreadcrumb(): string
+    {
+        return 'Tambah Pembayaran Utang';
+    }
+
     protected function getHeaderActions(): array
     {
         return [];
@@ -38,6 +43,11 @@ class CreatePembayaranPembelian extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        if (empty($data['tanggal_faktur']) && ! empty($data['grn_id'])) {
+            $data['tanggal_faktur'] = PembayaranPembelianResource::resolveTanggalPembayaran((int) $data['grn_id'])
+                ?? null;
+        }
+
         return $data;
     }
 
