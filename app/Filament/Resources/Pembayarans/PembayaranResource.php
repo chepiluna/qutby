@@ -60,7 +60,7 @@ class PembayaranResource extends Resource
     
     public static function shouldRegisterNavigation(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'operasional'], true);
     }
 
     public static function infolist(Schema $schema): Schema

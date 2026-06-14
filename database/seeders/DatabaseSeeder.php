@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Operasional',
                 'email' => 'operasional@qutby.com',
                 'password' => 'password',
-                'role' => 'sales',
+                'role' => 'operasional',
             ],
         ];
 

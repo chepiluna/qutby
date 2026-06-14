@@ -13,6 +13,8 @@ class VendorPaymentDueWidget extends Widget
 
     protected static ?int $sort = 2;
 
+    protected static bool $isLazy = false;
+
     protected int | string | array $columnSpan = 'full';
 
     protected string $view = 'filament.finance.widgets.vendor-payment-due';
@@ -28,18 +30,18 @@ class VendorPaymentDueWidget extends Widget
         ];
     }
 
-    public function dismissVendorPaymentDueNotification(int $terminId): void
+    public function dismissVendorPaymentDueNotification(int $purchaseId): void
     {
-        $this->dismissVendorPaymentDueNotifications([$terminId]);
+        $this->dismissVendorPaymentDueNotifications([$purchaseId]);
     }
 
     public function dismissVisibleVendorPaymentDueNotifications(): void
     {
-        $terminIds = $this->getVendorPaymentDueRows()
+        $purchaseIds = $this->getVendorPaymentDueRows()
             ->pluck('id')
             ->all();
 
-        $this->dismissVendorPaymentDueNotifications($terminIds);
+        $this->dismissVendorPaymentDueNotifications($purchaseIds);
     }
 
     protected function getVendorPaymentDueRows(): Collection
@@ -47,35 +49,28 @@ class VendorPaymentDueWidget extends Widget
         $today = now()->startOfDay();
         $dismissedIds = session(self::DISMISSED_SESSION_KEY, []);
 
-        return DB::table('po_termins')
-            ->join('pembelians', 'pembelians.id', '=', 'po_termins.pembelian_id')
+        return DB::table('pembelians')
             ->leftJoin('vendors', 'vendors.id', '=', 'pembelians.vendor_id')
             ->select([
-                'po_termins.id',
-                'po_termins.due_date',
-                'po_termins.nominal',
-                'po_termins.status',
+                'pembelians.id',
+                'pembelians.tanggal',
+                'pembelians.total_akhir',
+                'pembelians.status',
                 'pembelians.nomor',
+                'vendors.periode_pembayaran',
                 DB::raw('COALESCE(vendors.nama_vendor, "-") as vendor_name'),
             ])
+            ->where('pembelians.syarat_pembayaran', 'kredit')
             ->where(function ($query): void {
                 $query
-                    ->whereNull('po_termins.status')
-                    ->orWhere('po_termins.status', '!=', 'lunas');
+                    ->whereNull('pembelians.status')
+                    ->orWhere('pembelians.status', '!=', 'lunas');
             })
-            ->whereDate('po_termins.due_date', '>=', $today->toDateString())
-            ->whereDate('po_termins.due_date', '<=', $today->copy()->addDays(7)->toDateString())
-            ->orderByRaw("
-                CASE
-                    WHEN po_termins.due_date = ? THEN 0
-                    ELSE 1
-                END
-            ", [$today->toDateString()])
-            ->orderBy('po_termins.due_date')
-            ->limit(25)
             ->get()
             ->map(function ($row) use ($today): array {
-                $dueDate = Carbon::parse($row->due_date)->startOfDay();
+                $dueDate = Carbon::parse($row->tanggal)
+                    ->addMonthsNoOverflow((int) ($row->periode_pembayaran ?: 1))
+                    ->startOfDay();
                 $days = (int) $today->diffInDays($dueDate, false);
                 $isPaid = $row->status === 'lunas';
 
@@ -98,20 +93,22 @@ class VendorPaymentDueWidget extends Widget
                     'vendor' => $row->vendor_name,
                     'number' => $row->nomor ?: '-',
                     'dueDate' => $dueDate,
-                    'amount' => (float) $row->nominal,
+                    'amount' => (float) $row->total_akhir,
                     'isPaid' => $isPaid,
                     'urgency' => $urgency,
                     'badge' => $badge,
                 ];
             })
+            ->filter(fn (array $row): bool => $row['dueDate']->gte($today) && $row['dueDate']->lte($today->copy()->addDays(7)))
+            ->sortBy(fn (array $row): string => $row['dueDate']->toDateString())
             ->reject(fn (array $row): bool => in_array($row['id'], $dismissedIds, true))
             ->take(8)
             ->values();
     }
 
-    protected function dismissVendorPaymentDueNotifications(array $terminIds): void
+    protected function dismissVendorPaymentDueNotifications(array $purchaseIds): void
     {
-        if ($terminIds === []) {
+        if ($purchaseIds === []) {
             return;
         }
 
@@ -120,7 +117,7 @@ class VendorPaymentDueWidget extends Widget
         session([
             self::DISMISSED_SESSION_KEY => array_values(array_unique([
                 ...$dismissedIds,
-                ...array_map('intval', $terminIds),
+                ...array_map('intval', $purchaseIds),
             ])),
         ]);
     }

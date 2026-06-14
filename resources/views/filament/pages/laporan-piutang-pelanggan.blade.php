@@ -32,7 +32,7 @@
             </div>
 
             <div class="text-sm font-semibold">
-                CV QUTBY COLLECTION
+                CV.QUTBY CREATIVINDO
             </div>
 
             <div class="text-sm text-gray-600">

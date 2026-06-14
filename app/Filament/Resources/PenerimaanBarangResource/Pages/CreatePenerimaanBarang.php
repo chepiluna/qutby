@@ -62,7 +62,7 @@ class CreatePenerimaanBarang extends CreateRecord
             ]);
         }
 
-        $data['nomor_grn'] = PenerimaanBarang::generateNomor((int) $po->id);
+        $data['id_penerimaan'] = PenerimaanBarang::generateNomor((int) $po->id);
 
         if (empty($data['details']) && ! empty($data['pembelian_id'])) {
             $data['details'] = PenerimaanBarangResource::getOpenPenerimaanBarangItems($po);
@@ -222,7 +222,7 @@ class CreatePenerimaanBarang extends CreateRecord
                 'tanggal'     => $record->tanggal_terima,
                 'kode_jurnal' => $kodeJurnal,
                 'deskripsi'   =>
-                    'Penerimaan Barang ' . $record->nomor_grn,
+                    'Penerimaan Barang ' . $record->id_penerimaan,
             ]);
 
             $record->update([

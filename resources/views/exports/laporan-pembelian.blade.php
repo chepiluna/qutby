@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
-        h1 { font-size: 16px; margin: 0 0 3px; text-transform: uppercase; }
+        h1 { font-size: 14px; margin: 0 0 3px; text-transform: uppercase; }
         p { margin: 0 0 4px; }
         .report-header { margin-bottom: 18px; text-align: center; }
-        .company-name { font-size: 12px; font-weight: bold; margin-bottom: 3px; }
+        .company-name { font-size: 16px; font-weight: bold; margin-bottom: 3px; }
         .period { font-size: 11px; color: #374151; }
         table { width: 100%; border-collapse: collapse; margin-top: 14px; }
         thead { display: table-header-group; }
@@ -20,8 +20,8 @@
 </head>
 <body>
     <div class="report-header">
+        <div class="company-name">CV.QUTBY CREATIVINDO</div>
         <h1>Laporan Pembelian</h1>
-        <div class="company-name">CV QUTBY COLLECTION</div>
         <div class="period">PERIODE: {{ $periode }}</div>
     </div>
 

@@ -9,6 +9,8 @@ class LaporanPembelianFilter extends Widget
 {
     protected string $view = 'filament.widgets.laporan-pembelian-filter';
 
+    protected static bool $isLazy = false;
+
     protected int | string | array $columnSpan = 'full';
 
     public string $bulan = '';

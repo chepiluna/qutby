@@ -37,12 +37,13 @@ class CreatePembelian extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['nomor'] = Pembelian::generateNomorPembelian();
+        $data['nomor'] = Pembelian::generateNomorPembelian($data['tanggal'] ?? null);
         $data['status'] = 'menunggu';
 
         if (($data['syarat_pembayaran'] ?? null) === 'tunai') {
+            $data['vendor_id'] = null;
+
             if (filled($data['vendor_manual'] ?? null)) {
-                $data['vendor_id'] = null;
                 $data['vendor_manual'] = trim((string) $data['vendor_manual']);
             } else {
                 $data['vendor_manual'] = null;
@@ -52,11 +53,6 @@ class CreatePembelian extends CreateRecord
         }
 
         return $data;
-    }
-
-    protected function afterValidate(): void
-    {
-        PembelianResource::validateTerminState($this->form->getRawState());
     }
 
     protected function getFormActions(): array

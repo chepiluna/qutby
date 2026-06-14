@@ -39,14 +39,14 @@ class LaporanPembelian extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['finance', 'sales'], true)
-            && in_array(Auth::user()?->role, ['admin', 'finance', 'operasional', 'sales'], true);
+        return in_array(Filament::getCurrentPanel()?->getId(), ['finance', 'operasional'], true)
+            && in_array(Auth::user()?->role, ['admin', 'finance', 'operasional'], true);
     }
 
     public static function canAccess(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['finance', 'sales'], true)
-            && in_array(Auth::user()?->role, ['admin', 'finance', 'operasional', 'sales'], true);
+        return in_array(Filament::getCurrentPanel()?->getId(), ['finance', 'operasional'], true)
+            && in_array(Auth::user()?->role, ['admin', 'finance', 'operasional'], true);
     }
 
     public function getPeriodeLabel(): string

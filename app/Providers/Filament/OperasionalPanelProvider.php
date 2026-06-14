@@ -3,12 +3,12 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\CustomLogin;
-use App\Filament\Sales\Widgets\SalesStats;
+use App\Filament\Operasional\Widgets\SalesStats;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use App\Filament\Sales\Pages\Dashboard;
+use App\Filament\Operasional\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -22,12 +22,12 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class SalesPanelProvider extends PanelProvider
+class OperasionalPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('sales')
+            ->id('operasional')
             ->path('operasional')
             ->authGuard('web')
             ->login(CustomLogin::class)
@@ -43,13 +43,13 @@ class SalesPanelProvider extends PanelProvider
             ->brandName('QUTRIX')
             ->brandLogo(asset('images/logoqutby.png'))
             ->brandLogoHeight('2.6rem')
-            ->viteTheme('resources/css/filament/sales/theme.css')
+            ->viteTheme('resources/css/filament/operasional/theme.css')
             ->colors([
                 'primary' => Color::Amber,
             ]) // ← TUTUP colors di sini
             ->renderHook(
                 PanelsRenderHook::TOPBAR_LOGO_BEFORE,
-                fn () => view('filament.sales.partials.qutrix-brand'),
+                fn () => view('filament.operasional.partials.qutrix-brand'),
             )
 
             // Ambil resource/page/widget default (admin)
@@ -57,10 +57,10 @@ class SalesPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
 
-            // Khusus Sales
-            ->discoverResources(in: app_path('Filament/Sales/Resources'), for: 'App\\Filament\\Sales\\Resources')
-            ->discoverPages(in: app_path('Filament/Sales/Pages'), for: 'App\\Filament\\Sales\\Pages')
-            ->discoverWidgets(in: app_path('Filament/Sales/Widgets'), for: 'App\\Filament\\Sales\\Widgets')
+            // Khusus Operasional
+            ->discoverResources(in: app_path('Filament/Operasional/Resources'), for: 'App\\Filament\\Operasional\\Resources')
+            ->discoverPages(in: app_path('Filament/Operasional/Pages'), for: 'App\\Filament\\Operasional\\Pages')
+            ->discoverWidgets(in: app_path('Filament/Operasional/Widgets'), for: 'App\\Filament\\Operasional\\Widgets')
 
             ->pages([
                 Dashboard::class,

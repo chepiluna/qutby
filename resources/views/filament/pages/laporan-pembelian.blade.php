@@ -30,12 +30,12 @@
 
     <div class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div class="mx-auto w-max text-center">
-            <div class="text-lg font-bold tracking-wide text-gray-950 dark:text-white">
-                LAPORAN PEMBELIAN
+            <div class="text-xl font-bold text-gray-950 dark:text-white">
+                CV.QUTBY CREATIVINDO
             </div>
 
-            <div class="text-sm font-semibold text-gray-950 dark:text-white">
-                CV QUTBY COLLECTION
+            <div class="text-lg font-semibold tracking-wide text-gray-950 dark:text-white">
+                LAPORAN PEMBELIAN
             </div>
 
             <div class="text-sm text-gray-600 dark:text-gray-300">

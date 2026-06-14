@@ -16,15 +16,15 @@
         }
 
         .header h1 {
-            font-size: 16px;
+            font-size: 14px;
             margin: 0;
             font-weight: bold;
         }
 
         .header .company {
-            font-size: 12px;
+            font-size: 16px;
             margin-top: 4px;
-            font-weight: 600;
+            font-weight: bold;
         }
 
         .account-card {
@@ -100,8 +100,8 @@
 </head>
 <body>
     <div class="header">
+        <div class="company">CV.QUTBY CREATIVINDO</div>
         <h1>BUKU PEMBANTU PIUTANG</h1>
-        <div class="company">CV QUTBY COLLECTION</div>
     </div>
 
     @forelse($laporan as $index => $item)

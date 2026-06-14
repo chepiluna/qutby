@@ -24,7 +24,7 @@ class Vendor extends Model
         'periode_pembayaran',
     ];
 
-    /**
+    /**lu
      * Casting tipe data
      */
     protected $casts = [
@@ -58,17 +58,12 @@ class Vendor extends Model
         return 'VND-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
     }
 
-    /* ======================
-     | RELATIONS (OPSIONAL)
-     ====================== */
-
-    // Jika vendor punya banyak pembelian
+    
     public function pembelians()
     {
         return $this->hasMany(Pembelian::class, 'vendor_id');
     }
 
-    // Jika vendor punya banyak penerimaan barang
     public function penerimaanBarangs()
     {
         return $this->hasMany(PenerimaanBarang::class, 'vendor_id');

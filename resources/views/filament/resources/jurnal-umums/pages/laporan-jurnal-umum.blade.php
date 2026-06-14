@@ -1,42 +1,44 @@
 <x-filament-panels::page>
     {{-- HEADER LAPORAN --}}
-    <div class="text-center mb-6">
-        <h1 class="text-xl font-bold">
-            LAPORAN JURNAL UMUM
-        </h1>
+    <div class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div class="mx-auto w-max space-y-1 text-center">
+            <div class="text-xl font-bold text-gray-950 dark:text-white">
+                CV.QUTBY CREATIVINDO
+            </div>
 
-        <h2 class="text-base font-semibold">
-            QUTBY COLLECTION
-        </h2>
+            <div class="text-lg font-semibold tracking-wide text-gray-950 dark:text-white">
+                LAPORAN JURNAL UMUM
+            </div>
 
-        @php
-            $namaBulan = [
-                1 => 'Januari',
-                2 => 'Februari',
-                3 => 'Maret',
-                4 => 'April',
-                5 => 'Mei',
-                6 => 'Juni',
-                7 => 'Juli',
-                8 => 'Agustus',
-                9 => 'September',
-                10 => 'Oktober',
-                11 => 'November',
-                12 => 'Desember',
-            ];
-        @endphp
+            @php
+                $namaBulan = [
+                    1 => 'Januari',
+                    2 => 'Februari',
+                    3 => 'Maret',
+                    4 => 'April',
+                    5 => 'Mei',
+                    6 => 'Juni',
+                    7 => 'Juli',
+                    8 => 'Agustus',
+                    9 => 'September',
+                    10 => 'Oktober',
+                    11 => 'November',
+                    12 => 'Desember',
+                ];
+            @endphp
 
-        <p class="text-sm text-gray-600">
-            @if ($this->bulan && $this->tahun)
-                Periode
-                {{ $namaBulan[$this->bulan] }}
-                {{ $this->tahun }}
-            @elseif ($this->tahun)
-                Tahun {{ $this->tahun }}
-            @else
-                Semua Periode
-            @endif
-        </p>
+            <div class="text-sm text-gray-600 dark:text-gray-300">
+                @if ($this->bulan && $this->tahun)
+                    PERIODE:
+                    {{ $namaBulan[$this->bulan] }}
+                    {{ $this->tahun }}
+                @elseif ($this->tahun)
+                    PERIODE: Tahun {{ $this->tahun }}
+                @else
+                    PERIODE: Semua Periode
+                @endif
+            </div>
+        </div>
     </div>
 
     {{-- FORM FILTER --}}

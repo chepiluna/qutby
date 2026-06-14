@@ -14,11 +14,9 @@ use Filament\Schemas\Components\Actions as SchemaActions;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Checkbox;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -27,7 +25,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 //use App\Filament\Traits\HasRoleAccess;
-use Illuminate\Support\HtmlString;
 use Filament\Facades\Filament;
 
 class PembelianResource extends Resource
@@ -66,11 +63,13 @@ class PembelianResource extends Resource
                             ->required()
                             ->default(now())
                             ->live()
-                            ->afterStateUpdated(fn (Get $get, Set $set) => self::syncTerminRows($get, $set)),
+                            ->afterStateUpdated(function (Get $get, Set $set, $state): void {
+                                $set('nomor', Pembelian::generateNomorPembelian($state));
+                            }),
 
                         TextInput::make('nomor')
                             ->label('Nomor PO')
-                            ->default(fn () => Pembelian::generateNomorPembelian())
+                            ->default(fn (Get $get) => Pembelian::generateNomorPembelian($get('tanggal') ?: now()))
                             ->disabled()
                             ->dehydrated()
                             ->required(),
@@ -84,29 +83,23 @@ class PembelianResource extends Resource
                             ->default('kredit')
                             ->live()
                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                $set('vendor_id', null);
-                                $set('vendor_manual', null);
-                                $set('use_vendor_manual', false);
-
                                 if ($state === 'tunai') {
-                                    $set('termin', []);
-                                    $set('jumlah_termin', null);
+                                    $set('vendor_id', null);
+                                    $set('vendor_manual', null);
+                                    $set('use_vendor_manual', true);
+
                                     return;
                                 }
 
-                                $set('jumlah_termin', $get('jumlah_termin') ?: '2');
-                                self::syncTerminRows($get, $set);
+                                $set('vendor_manual', null);
+                                $set('use_vendor_manual', false);
                             })
                             ->required(),
 
                         Hidden::make('use_vendor_manual')
                             ->default(false)
                             ->afterStateHydrated(function (Get $get, Set $set): void {
-                                $set(
-                                    'use_vendor_manual',
-                                    $get('syarat_pembayaran') === 'tunai'
-                                    && filled($get('vendor_manual'))
-                                );
+                                $set('use_vendor_manual', $get('syarat_pembayaran') === 'tunai');
                             })
                             ->dehydrated(false),
 
@@ -116,10 +109,7 @@ class PembelianResource extends Resource
                             ->relationship('vendor', 'nama_vendor')
                             ->searchable()
                             ->preload()
-                            ->required(fn (Get $get): bool => ! (
-                                $get('syarat_pembayaran') === 'tunai'
-                                && (bool) $get('use_vendor_manual')
-                            ))
+                            ->required(fn (Get $get): bool => $get('syarat_pembayaran') !== 'tunai')
                             ->hidden(fn (Get $get): bool => $get('syarat_pembayaran') === 'tunai' && (bool) $get('use_vendor_manual'))
                             ->live()
                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
@@ -141,21 +131,17 @@ class PembelianResource extends Resource
                                     && ! (bool) $get('use_vendor_manual')
                                     && blank($get('vendor_id'))
                                 )
-                                ->action(function (Set $set): void {
-                                    $set('vendor_id', null);
-                                    $set('vendor_manual', null);
-                                    $set('use_vendor_manual', true);
-                                }),
+                            ->action(function (Set $set): void {
+                                $set('vendor_id', null);
+                                $set('vendor_manual', null);
+                                $set('use_vendor_manual', true);
+                            }),
                         ]),
 
                         TextInput::make('vendor_manual')
                             ->label('Vendor')
                             ->placeholder('Ketik nama vendor')
                             ->visible(fn (Get $get): bool =>
-                                $get('syarat_pembayaran') === 'tunai'
-                                && (bool) $get('use_vendor_manual')
-                            )
-                            ->required(fn (Get $get): bool =>
                                 $get('syarat_pembayaran') === 'tunai'
                                 && (bool) $get('use_vendor_manual')
                             )
@@ -194,7 +180,7 @@ class PembelianResource extends Resource
                                     ->numeric()
                                     ->default(1)
                                     ->required()
-                                    ->live()
+                                    ->live(debounce: 600)
                                     ->afterStateUpdated(fn (Get $get, Set $set) => self::hitungSubtotal($get, $set)),
 
                                 TextInput::make('satuan')
@@ -209,7 +195,7 @@ class PembelianResource extends Resource
                                     ->numeric()
                                     ->prefix('Rp')
                                     ->required()
-                                    ->live()
+                                    ->live(debounce: 600)
                                     ->afterStateUpdated(fn (Get $get, Set $set) => self::hitungSubtotal($get, $set)),
 
                                 TextInput::make('subtotal')
@@ -237,7 +223,7 @@ class PembelianResource extends Resource
                             ->numeric()
                             ->default(0)
                             ->dehydrated()
-                            ->live()
+                            ->live(debounce: 600)
                             ->afterStateUpdated(fn (Get $get, Set $set) => self::hitungTotal($get, $set)),
 
                         Checkbox::make('ppn')
@@ -253,76 +239,6 @@ class PembelianResource extends Resource
                             ->dehydrated(),
                     ]),
 
-                Section::make('Skema Pembayaran')
-                    ->hidden(fn (Get $get): bool => $get('syarat_pembayaran') === 'tunai')
-                    ->schema([
-                        ToggleButtons::make('jumlah_termin')
-                            ->label('Pilih Pembayaran')
-                            ->options([
-                                '2' => '2x Bayar',
-                                '3' => '3x Bayar',
-                            ])
-                            ->inline()
-                            ->live()
-                            ->dehydrated(false)
-                            ->default(fn ($record): string => in_array($record?->poTermins()->count(), [2, 3], true)
-                                ? (string) $record->poTermins()->count()
-                                : '2')
-                            ->required()
-                            ->extraAttributes(['class' => 'po-termin-toggle'])
-                            ->afterStateHydrated(fn (Set $set, Get $get) => self::syncTerminRows($get, $set))
-                            ->afterStateUpdated(fn (Set $set, Get $get) => self::syncTerminRows($get, $set)),
-
-                        Repeater::make('termin')
-                            ->label('Tahap')
-                            ->relationship('poTermins')
-                            ->columns(3)
-                            ->schema([
-                                Hidden::make('termin_ke')
-                                    ->dehydrated(),
-
-                                Hidden::make('status')
-                                    ->default('belum_bayar')
-                                    ->dehydrated(),
-
-                                Placeholder::make('termin_badge')
-                                    ->label('TAHAP')
-                                    ->content(fn (Get $get): HtmlString => new HtmlString(
-                                        '<span style="display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; border-radius:999px; background:#EEEDFE; color:#6d28d9; font-weight:800;">'
-                                        . e((string) ($get('termin_ke') ?? '-'))
-                                        . '</span>'
-                                    )),
-
-                                DatePicker::make('due_date')
-                                    ->label('TANGGAL PEMBAYARAN')
-                                    ->disabled()
-                                    ->dehydrated()
-                                    ->required(),
-
-                                TextInput::make('nominal')
-                                    ->label('NOMINAL (Rp)')
-                                    ->numeric()
-                                    ->prefix('Rp')
-                                    ->disabled()
-                                    ->dehydrated()
-                                    ->required()
-                                    ->live(),
-
-                            ])
-                            ->addable(false)
-                            ->deletable(false)
-                            ->reorderable(false)
-                            ->hidden(fn (Get $get): bool => blank($get('jumlah_termin')))
-                            ->mutateRelationshipDataBeforeCreateUsing(fn (array $data): array => [
-                                ...$data,
-                                'status' => $data['status'] ?? 'belum_bayar',
-                            ])
-                            ->mutateRelationshipDataBeforeSaveUsing(fn (array $data): array => [
-                                ...$data,
-                                'status' => $data['status'] ?? 'belum_bayar',
-                            ]),
-
-                    ]),
             ]);
     }
 
@@ -338,8 +254,8 @@ class PembelianResource extends Resource
         $total = 0;
 
         foreach ($details as $item) {
-            $qty   = (float) ($item['qty'] ?? 0);
-            $harga = (float) ($item['harga'] ?? 0);
+            $qty = self::parseNumber($item['qty'] ?? 0);
+            $harga = self::parseNumber($item['harga'] ?? 0);
             $total += $qty * $harga;
         }
 
@@ -359,8 +275,6 @@ class PembelianResource extends Resource
 
         $set($prefix . 'total', round($total));
         $set($prefix . 'total_akhir', round($totalAkhir));
-
-        self::syncTerminRows($get, $set, $prefix);
     }
 
     /** Dipanggil dari form root (vendor, ppn) */
@@ -393,8 +307,8 @@ class PembelianResource extends Resource
     /** Dipanggil dari dalam repeater item (barang, qty, harga) */
     protected static function hitungSubtotal(Get $get, Set $set): void
     {
-        $qty     = (float) ($get('qty') ?? 0);
-        $harga   = (float) ($get('harga') ?? 0);
+        $qty = self::parseNumber($get('qty') ?? 0);
+        $harga = self::parseNumber($get('harga') ?? 0);
         $subtotal = $qty * $harga;
 
         $set('subtotal', round($subtotal));
@@ -403,74 +317,30 @@ class PembelianResource extends Resource
         self::recalculate($get, $set, '../../');
     }
 
-    protected static function syncTerminRows(Get $get, Set $set, string $prefix = ''): void
+    protected static function parseNumber(mixed $value): float
     {
-        if (($get($prefix . 'syarat_pembayaran') ?? 'kredit') === 'tunai') {
-            $set($prefix . 'termin', []);
-            return;
+        if (is_int($value) || is_float($value)) {
+            return (float) $value;
         }
 
-        $count = (int) ($get($prefix . 'jumlah_termin') ?? 0);
+        $value = trim((string) $value);
 
-        if (! in_array($count, [2, 3], true)) {
-            $count = 2;
-            $set($prefix . 'jumlah_termin', (string) $count);
+        if ($value === '') {
+            return 0;
         }
 
-        $totalAkhir = (float) ($get($prefix . 'total_akhir') ?? 0);
-        $tanggal = $get($prefix . 'tanggal') ?: now()->toDateString();
-        $existing = array_values($get($prefix . 'termin') ?? []);
-        $baseNominal = $count > 0 ? floor($totalAkhir / $count) : 0;
-        $allocated = 0;
-        $rows = [];
+        $value = preg_replace('/[^\d,.-]/', '', $value) ?? '';
 
-        for ($i = 1; $i <= $count; $i++) {
-            $current = $existing[$i - 1] ?? [];
-            $nominal = $i === $count
-                ? max(0, round($totalAkhir - $allocated, 2))
-                : $baseNominal;
-
-            $allocated += $nominal;
-
-            $rows[] = [
-                'termin_ke' => $i,
-                'due_date' => \Illuminate\Support\Carbon::parse($tanggal)->addDays(30 * $i)->toDateString(),
-                'nominal' => $nominal,
-                'status' => $current['status'] ?? 'belum_bayar',
-            ];
+        if (str_contains($value, ',') && str_contains($value, '.')) {
+            $value = str_replace('.', '', $value);
+            $value = str_replace(',', '.', $value);
+        } elseif (str_contains($value, ',')) {
+            $value = str_replace(',', '.', $value);
+        } elseif (substr_count($value, '.') > 1 || preg_match('/\.\d{3}$/', $value)) {
+            $value = str_replace('.', '', $value);
         }
 
-        $set($prefix . 'termin', $rows);
-    }
-
-    public static function validateTerminState(array $state): void
-    {
-        if (($state['syarat_pembayaran'] ?? 'kredit') === 'tunai') {
-            return;
-        }
-
-        $jumlahTermin = (int) ($state['jumlah_termin'] ?? 0);
-        $termins = array_values($state['termin'] ?? []);
-        $totalAkhir = (float) ($state['total_akhir'] ?? 0);
-        $allocated = collect($termins)->sum(fn (array $termin): float => (float) ($termin['nominal'] ?? 0));
-
-        if (! in_array($jumlahTermin, [2, 3], true)) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'data.jumlah_termin' => 'Pilih jumlah termin pembayaran 2x atau 3x.',
-            ]);
-        }
-
-        if (count($termins) !== $jumlahTermin) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'data.termin' => 'Jumlah baris termin harus sesuai dengan pilihan jumlah termin.',
-            ]);
-        }
-
-        if (abs($allocated - $totalAkhir) >= 0.01) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'data.termin' => 'Total nominal termin harus sama dengan Total Akhir PO.',
-            ]);
-        }
+        return (float) $value;
     }
 
     public static function table(Table $table): Table
@@ -488,9 +358,14 @@ class PembelianResource extends Resource
                             ->orWhereHas('vendor', fn ($vendorQuery) => $vendorQuery->where('nama_vendor', 'like', "%{$search}%"));
                     }),
                 TextColumn::make('total_akhir')
-                    ->label('Total PO')
+                    ->label('Total Harga PO')
                     ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state ?? 0, 0, ',', '.'))
                     ->sortable(),
+                TextColumn::make('status_penerimaan_display')
+                    ->label('Status')
+                    ->badge()
+                    ->getStateUsing(fn (Pembelian $record): string => $record->status === 'selesai' ? 'Diterima' : 'Belum Diterima')
+                    ->color(fn (string $state): string => $state === 'Diterima' ? 'success' : 'warning'),
             ])
             ->filters([])
             ->recordActions([
@@ -520,6 +395,6 @@ class PembelianResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'operasional'], true);
     }
 }
