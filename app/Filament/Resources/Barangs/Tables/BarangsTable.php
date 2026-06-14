@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Barangs\Tables;
 
+use App\Models\Barang;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -42,7 +44,20 @@ class BarangsTable
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->before(function (DeleteAction $action, Barang $record): void {
+                        if (! $record->hasTransactionHistory()) {
+                            return;
+                        }
+
+                        Notification::make()
+                            ->title('Barang tidak bisa dihapus')
+                            ->body('Barang ini sudah dipakai di transaksi penjualan.')
+                            ->warning()
+                            ->send();
+
+                        $action->cancel();
+                    }),
             ])
             ->toolbarActions([
                 //

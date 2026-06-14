@@ -22,6 +22,9 @@ class PenerimaanBarangKonfirmasiService
         ) {
 
             if ($PenerimaanBarang->status === 'dikonfirmasi') {
+                app(KartuStokAverageService::class)
+                    ->syncPenerimaanBarang($PenerimaanBarang);
+
                 return;
             }
 
@@ -41,7 +44,9 @@ class PenerimaanBarangKonfirmasiService
 
                 $qtyRusak = (int) ($detail->qty_rusak ?? 0);
 
-                $qtyRusak = $detail->kondisi !== 'baik' && $qtyRusak === 0
+                $kondisi = (string) ($detail->getAttribute('kondisi') ?? 'baik');
+
+                $qtyRusak = in_array($kondisi, ['rusak', 'rusak_sebagian', 'rusak_semua'], true) && $qtyRusak === 0
                     ? $qtyDiterima
                     : min($qtyRusak, $qtyDiterima);
 
@@ -52,17 +57,6 @@ class PenerimaanBarangKonfirmasiService
                 if ($qtyMasuk <= 0 || ! $barang) {
                     continue;
                 }
-
-                $hargaUnit = (float) (
-                    $detail->pembelianDetail->harga ?? 0
-                );
-
-                $diskonPersen = (float) (
-                    $detail->pembelianDetail->diskon_persen ?? 0
-                );
-
-                $hargaDiskon =
-                    $hargaUnit * (1 - ($diskonPersen / 100));
 
                 $qtyOutstandingSebelum = $detail->pembelianDetail
                     ? max(
@@ -80,22 +74,6 @@ class PenerimaanBarangKonfirmasiService
                 $hasIssue = $hasIssue
                     || $qtyRusak > 0
                     || $qtyKurang > 0;
-
-                /**
-                 * =========================
-                 * UPDATE KARTU STOK AVERAGE
-                 * =========================
-                 */
-                app(KartuStokAverageService::class)
-                    ->tambahPembelian(
-                        barangId: $barang->id,
-                        tanggal: $PenerimaanBarang->tanggal_terima,
-                        qty: $qtyMasuk,
-                        hargaBeli: $hargaDiskon,
-                        keterangan:
-                            'Penerimaan Barang ' .
-                            $PenerimaanBarang->nomor_grn
-                    );
             }
 
             /**
@@ -117,6 +95,9 @@ class PenerimaanBarangKonfirmasiService
                 'dikonfirmasi_oleh' => $userId,
                 'dikonfirmasi_at' => now(),
             ]);
+
+            app(KartuStokAverageService::class)
+                ->syncPenerimaanBarang($PenerimaanBarang);
 
             /**
              * =========================

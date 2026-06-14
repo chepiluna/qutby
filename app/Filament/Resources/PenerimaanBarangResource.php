@@ -65,7 +65,7 @@ class PenerimaanBarangResource extends Resource
             Section::make('Informasi Penerimaan Barang')
                 ->columns(3)
                 ->schema([
-                    TextInput::make('nomor_grn')
+                    TextInput::make('id_penerimaan')
                         ->label('Nomor Penerimaan')
                         ->default(fn (Get $get) => PenerimaanBarang::generateNomor((int) $get('pembelian_id') ?: null))
                         ->disabled()
@@ -74,6 +74,7 @@ class PenerimaanBarangResource extends Resource
                     Select::make('pembelian_id')
                         ->label('PO Terkait')
                         ->options(fn (): array => self::getAvailablePembelianOptions())
+                        ->getOptionLabelUsing(fn ($value): ?string => Pembelian::find($value)?->nomor)
                         ->searchable()
                         ->preload()
                         ->required()
@@ -106,6 +107,11 @@ class PenerimaanBarangResource extends Resource
                         ->default(now())
                         ->minDate(fn (Get $get) => Pembelian::find($get('pembelian_id'))?->tanggal)
                         ->required(),
+
+                    TextInput::make('nomor_faktur')
+                        ->label('Nomor Faktur')
+                        ->required()
+                        ->maxLength(100),
 
                     TextInput::make('nomor_surat_jalan')
                         ->label('Nomor Surat Jalan')
@@ -253,9 +259,7 @@ class PenerimaanBarangResource extends Resource
             ->filter(fn (Pembelian $po): bool => $po->details->contains(
                 fn (PembelianDetail $detail): bool => $detail->qty_outstanding > 0
             ))
-            ->mapWithKeys(fn (Pembelian $po): array => [
-                $po->id => $po->nomor . ' - ' . ($po->vendor_manual ?: ($po->vendor?->nama_vendor ?? '-')),
-            ])
+            ->mapWithKeys(fn (Pembelian $po): array => [$po->id => $po->nomor])
             ->all();
     }
 
@@ -283,7 +287,7 @@ class PenerimaanBarangResource extends Resource
         $set('vendor_id', $po->vendor_id);
         $set('vendor_manual', $po->vendor_manual);
         $set('details', $items);
-        $set('nomor_grn', PenerimaanBarang::generateNomor((int) $po->id));
+        $set('id_penerimaan', PenerimaanBarang::generateNomor((int) $po->id));
     }
 
     protected static function isPartialPo(mixed $pembelianId): bool
@@ -415,7 +419,7 @@ class PenerimaanBarangResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('nomor_grn')
+                TextColumn::make('id_penerimaan')
                     ->label('Nomor Penerimaan')
                     ->searchable()
                     ->sortable(),
@@ -439,6 +443,11 @@ class PenerimaanBarangResource extends Resource
 
                 TextColumn::make('nomor_surat_jalan')
                     ->label('Surat Jalan')
+                    ->searchable()
+                    ->placeholder('-'),
+
+                TextColumn::make('nomor_faktur')
+                    ->label('Nomor Faktur')
                     ->searchable()
                     ->placeholder('-'),
             ])
@@ -466,6 +475,6 @@ class PenerimaanBarangResource extends Resource
     }
     public static function shouldRegisterNavigation(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'operasional'], true);
     }
 }

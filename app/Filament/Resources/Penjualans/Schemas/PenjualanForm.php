@@ -247,7 +247,7 @@ class PenjualanForm
                                         $state
                                     ) {
 
-                                        $harga = (float) ($get('harga_satuan') ?? 0);
+                                        $harga = self::parseNumber($get('harga_satuan') ?? 0);
 
                                         $qty = (int) ($state ?? 0);
 
@@ -266,7 +266,7 @@ class PenjualanForm
                                     ->numeric()
                                     ->required()
                                     ->prefix('Rp')
-                                    ->live(debounce: 300)
+                                    ->live(debounce: 600)
 
                                     ->afterStateUpdated(function (
                                         Get $get,
@@ -276,7 +276,7 @@ class PenjualanForm
 
                                         $qty = (int) ($get('qty') ?? 0);
 
-                                        $harga = (float) ($state ?? 0);
+                                        $harga = self::parseNumber($state ?? 0);
 
                                         $subtotal = $qty * $harga;
 
@@ -390,5 +390,31 @@ class PenjualanForm
                     ->columnSpanFull(),
 
             ]);
+    }
+
+    protected static function parseNumber(mixed $value): float
+    {
+        if (is_int($value) || is_float($value)) {
+            return (float) $value;
+        }
+
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return 0;
+        }
+
+        $value = preg_replace('/[^\d,.-]/', '', $value) ?? '';
+
+        if (str_contains($value, ',') && str_contains($value, '.')) {
+            $value = str_replace('.', '', $value);
+            $value = str_replace(',', '.', $value);
+        } elseif (str_contains($value, ',')) {
+            $value = str_replace(',', '.', $value);
+        } elseif (substr_count($value, '.') > 1 || preg_match('/\.\d{3}$/', $value)) {
+            $value = str_replace('.', '', $value);
+        }
+
+        return (float) $value;
     }
 }

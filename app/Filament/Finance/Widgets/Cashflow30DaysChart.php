@@ -5,15 +5,18 @@ namespace App\Filament\Finance\Widgets;
 use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class Cashflow30DaysChart extends ChartWidget
 {
     protected ?string $heading = 'Cashflow Overview (Last 30 Days)';
-    protected static ?int $sort = 3;
-    protected int | string | array $columnSpan = 1;
 
-    // 🔥 kecilin tinggi chart
+    protected static ?int $sort = 3;
+
+    protected static bool $isLazy = false;
+
+    protected int | string | array $columnSpan = 1;
 
     protected function getType(): string
     {
@@ -69,57 +72,57 @@ JS);
 
     protected function getData(): array
     {
-        $start = now()->subDays(29)->startOfDay();
-        $end   = now()->endOfDay();
+        return Cache::remember('finance-cashflow-30-days:' . now()->format('Y-m-d-H-i'), 60, function (): array {
+            $start = now()->subDays(29)->startOfDay();
+            $end = now()->endOfDay();
 
-        // 🔥 CASH IN (REAL)
-        $incomeRows = DB::table('pembayaran')
-            ->selectRaw('DATE(tanggal_bayar) as d, SUM(jumlah_bayar - COALESCE(diskon_termin,0)) as total')
-            ->whereBetween('tanggal_bayar', [$start, $end])
-            ->groupBy('d')
-            ->orderBy('d')
-            ->pluck('total', 'd');
+            $incomeRows = DB::table('pembayaran')
+                ->selectRaw('DATE(tanggal_bayar) as d, SUM(jumlah_bayar - COALESCE(diskon_termin,0)) as total')
+                ->whereBetween('tanggal_bayar', [$start, $end])
+                ->groupBy('d')
+                ->orderBy('d')
+                ->pluck('total', 'd');
 
-        // 🔥 CASH OUT
-        $expenseRows = DB::table('pengeluaran')
-            ->selectRaw('DATE(tanggal_pengeluaran) as d, SUM(jumlah) as total')
-            ->whereBetween('tanggal_pengeluaran', [$start, $end])
-            ->groupBy('d')
-            ->orderBy('d')
-            ->pluck('total', 'd');
+            $expenseRows = DB::table('pengeluaran')
+                ->selectRaw('DATE(tanggal_pengeluaran) as d, SUM(jumlah) as total')
+                ->whereBetween('tanggal_pengeluaran', [$start, $end])
+                ->groupBy('d')
+                ->orderBy('d')
+                ->pluck('total', 'd');
 
-        $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
+            $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
 
-        $labels  = [];
-        $income  = [];
-        $expense = [];
+            $labels = [];
+            $income = [];
+            $expense = [];
 
-        foreach ($period as $date) {
-            $d = $date->toDateString();
+            foreach ($period as $date) {
+                $d = $date->toDateString();
 
-            $labels[]  = $date->format('d M');
-            $income[]  = (float) ($incomeRows[$d] ?? 0);
-            $expense[] = (float) ($expenseRows[$d] ?? 0);
-        }
+                $labels[] = $date->format('d M');
+                $income[] = (float) ($incomeRows[$d] ?? 0);
+                $expense[] = (float) ($expenseRows[$d] ?? 0);
+            }
 
-        return [
-            'datasets' => [
-                [
-                    'label' => 'Cash In',
-                    'data' => $income,
-                    'backgroundColor' => '#22c55e',
-                    'borderRadius' => 6,
-                    'barThickness' => 18,
+            return [
+                'datasets' => [
+                    [
+                        'label' => 'Cash In',
+                        'data' => $income,
+                        'backgroundColor' => '#22c55e',
+                        'borderRadius' => 6,
+                        'barThickness' => 18,
+                    ],
+                    [
+                        'label' => 'Cash Out',
+                        'data' => $expense,
+                        'backgroundColor' => '#ef4444',
+                        'borderRadius' => 6,
+                        'barThickness' => 18,
+                    ],
                 ],
-                [
-                    'label' => 'Cash Out',
-                    'data' => $expense,
-                    'backgroundColor' => '#ef4444',
-                    'borderRadius' => 6,
-                    'barThickness' => 18,
-                ],
-            ],
-            'labels' => $labels,
-        ];
+                'labels' => $labels,
+            ];
+        });
     }
 }

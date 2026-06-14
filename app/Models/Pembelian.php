@@ -42,10 +42,11 @@ class Pembelian extends Model
      * Generate nomor pembelian otomatis
      * Format: PO-YYYY-MM-0001
      */
-    public static function generateNomorPembelian(): string
+    public static function generateNomorPembelian(mixed $tanggal = null): string
     {
-        $tahun = Carbon::now()->format('Y');
-        $bulan = Carbon::now()->format('m');
+        $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
+        $tahun = $date->format('Y');
+        $bulan = $date->format('m');
         $prefix = "PO-$tahun-$bulan-";
 
         $lastNomor = self::query()
@@ -102,11 +103,6 @@ class Pembelian extends Model
     public function pembayaranPembelian(): HasOne
     {
         return $this->hasOne(PembayaranPembelian::class, 'pembelian_id');
-    }
-
-    public function poTermins(): HasMany
-    {
-        return $this->hasMany(PoTermin::class, 'pembelian_id')->orderBy('termin_ke');
     }
 
     public function refreshStatusPenerimaan(): void

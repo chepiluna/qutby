@@ -9,13 +9,14 @@ use Illuminate\Support\Facades\DB;
 
 class PenerimaanBarang extends Model
 {
-    protected $table = 'grns';
+    protected $table = 'penerimaan_barangs';
 
     protected $fillable = [
-        'nomor_grn',
+        'id_penerimaan',
         'pembelian_id',
         'vendor_id',
         'tanggal_terima',
+        'nomor_faktur',
         'nomor_surat_jalan',
         'gudang_tujuan',
         'catatan',
@@ -23,6 +24,7 @@ class PenerimaanBarang extends Model
         'status_penerimaan',
         'dikonfirmasi_oleh',
         'dikonfirmasi_at',
+        'jurnal_umum_id',
     ];
 
     protected $casts = [
@@ -36,13 +38,13 @@ class PenerimaanBarang extends Model
     protected static function booted(): void
     {
         static::creating(function (self $model) {
-            if (empty($model->nomor_grn)) {
-                $model->nomor_grn = self::generateNomor();
+            if (empty($model->id_penerimaan)) {
+                $model->id_penerimaan = self::generateNomor();
             }
 
-            while (self::where('nomor_grn', $model->nomor_grn)->exists()) {
-                $lastNumber = (int) substr($model->nomor_grn, -4);
-                $model->nomor_grn = substr($model->nomor_grn, 0, -4) . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+            while (self::where('id_penerimaan', $model->id_penerimaan)->exists()) {
+                $lastNumber = (int) substr($model->id_penerimaan, -4);
+                $model->id_penerimaan = substr($model->id_penerimaan, 0, -4) . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
             }
         });
     }
@@ -56,7 +58,7 @@ class PenerimaanBarang extends Model
             $existing = self::query()
                 ->where('pembelian_id', $pembelianId)
                 ->orderBy('id')
-                ->pluck('nomor_grn');
+                ->pluck('id_penerimaan');
 
             if ($existing->isNotEmpty()) {
                 $base = preg_replace('/-T\d+$/', '', (string) $existing->first());
@@ -66,9 +68,9 @@ class PenerimaanBarang extends Model
             }
         }
 
-        $lastNumber = DB::table('grns')
-            ->where('nomor_grn', 'like', "{$prefix}%")
-            ->pluck('nomor_grn')
+        $lastNumber = DB::table('penerimaan_barangs')
+            ->where('id_penerimaan', 'like', "{$prefix}%")
+            ->pluck('id_penerimaan')
             ->map(function (string $nomor) use ($prefix): int {
                 $withoutPrefix = str_replace($prefix, '', preg_replace('/-T\d+$/', '', $nomor));
 

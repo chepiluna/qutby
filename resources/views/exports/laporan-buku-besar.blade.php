@@ -16,15 +16,15 @@
         }
 
         .header h1 {
-            font-size: 16px;
+            font-size: 14px;
             margin: 0;
             font-weight: bold;
         }
 
         .header .company {
-            font-size: 12px;
+            font-size: 16px;
             margin-top: 4px;
-            font-weight: 600;
+            font-weight: bold;
         }
 
         .header .periode {
@@ -65,7 +65,7 @@
         }
 
         th {
-            border-bottom: 1px solid #000;
+            border: 1px solid #777;
             padding: 8px 6px;
             text-align: left;
             font-size: 10px;
@@ -73,6 +73,7 @@
         }
 
         td {
+            border: 1px solid #999;
             padding: 6px 6px;
             vertical-align: top;
             font-size: 10px;
@@ -98,8 +99,8 @@
 </head>
 <body>
     <div class="header">
+        <div class="company">CV.QUTBY CREATIVINDO</div>
         <h1>LAPORAN BUKU BESAR</h1>
-        <div class="company">CV QUTBY COLLECTION</div>
         <div class="periode">PERIODE: {{ $periode }}</div>
         @if(isset($akun) && $akun)
             <div class="filter">Akun: {{ $akun->kode_akun }} — {{ $akun->nama_akun }}</div>
@@ -110,7 +111,27 @@
         @php
             $akun = $ledger['akun'];
             $saldoAkhir = collect($ledger['rows'])->last()['saldo'] ?? $ledger['saldo_awal'];
-            $saldoLabel = ($ledger['normal_side'] ?? 'debit') === 'debit' ? 'Saldo (D)' : 'Saldo (K)';
+            $saldoColumns = function (float|int $saldo) use ($ledger): array {
+                $normalSide = $ledger['normal_side'] ?? 'debit';
+                $amount = abs((float) $saldo);
+
+                if ((float) $saldo === 0.0) {
+                    return ['debit' => 0.0, 'kredit' => 0.0];
+                }
+
+                if ($normalSide === 'debit') {
+                    return $saldo > 0
+                        ? ['debit' => $amount, 'kredit' => 0.0]
+                        : ['debit' => 0.0, 'kredit' => $amount];
+                }
+
+                return $saldo > 0
+                    ? ['debit' => 0.0, 'kredit' => $amount]
+                    : ['debit' => $amount, 'kredit' => 0.0];
+            };
+            $formatSaldo = fn (float|int $value): string => $value ? 'Rp ' . number_format($value, 0, ',', '.') : '-';
+            $saldoAwalColumns = $saldoColumns($ledger['saldo_awal']);
+            $saldoAkhirColumns = $saldoColumns($saldoAkhir);
         @endphp
 
         <div class="account-card">
@@ -126,12 +147,16 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Tanggal</th>
-                        <th>Keterangan</th>
-                        <th>Ref</th>
-                        <th class="right">Debit</th>
-                        <th class="right">Kredit</th>
-                        <th class="right">{{ $saldoLabel }}</th>
+                        <th rowspan="2">Tanggal</th>
+                        <th rowspan="2">Keterangan</th>
+                        <th rowspan="2">Ref</th>
+                        <th rowspan="2" class="right">Debit</th>
+                        <th rowspan="2" class="right">Kredit</th>
+                        <th colspan="2" class="center">Saldo</th>
+                    </tr>
+                    <tr>
+                        <th class="right">Debit (Rp)</th>
+                        <th class="right">Kredit (Rp)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -141,27 +166,33 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td class="right">Rp {{ number_format($ledger['saldo_awal'], 0, ',', '.') }}</td>
+                        <td class="right">{{ $formatSaldo($saldoAwalColumns['debit']) }}</td>
+                        <td class="right">{{ $formatSaldo($saldoAwalColumns['kredit']) }}</td>
                     </tr>
 
                     @forelse($ledger['rows'] as $row)
+                        @php
+                            $rowSaldoColumns = $saldoColumns($row['saldo']);
+                        @endphp
                         <tr>
                             <td class="small">{{ \Carbon\Carbon::parse($row['tanggal'])->format('d/m/Y') }}</td>
                             <td class="small">{{ $row['keterangan'] }}</td>
                             <td class="small">{{ $row['ref'] }}</td>
                             <td class="small right">{{ $row['debit'] ? 'Rp ' . number_format($row['debit'], 0, ',', '.') : '-' }}</td>
                             <td class="small right">{{ $row['kredit'] ? 'Rp ' . number_format($row['kredit'], 0, ',', '.') : '-' }}</td>
-                            <td class="small right">Rp {{ number_format($row['saldo'], 0, ',', '.') }}</td>
+                            <td class="small right">{{ $formatSaldo($rowSaldoColumns['debit']) }}</td>
+                            <td class="small right">{{ $formatSaldo($rowSaldoColumns['kredit']) }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="center small">Tidak ada transaksi bulan ini</td>
+                            <td colspan="7" class="center small">Tidak ada transaksi bulan ini</td>
                         </tr>
                     @endforelse
 
                     <tr class="footer-row">
                         <td colspan="5" class="right">Saldo Akhir</td>
-                        <td class="right">Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</td>
+                        <td class="right">{{ $formatSaldo($saldoAkhirColumns['debit']) }}</td>
+                        <td class="right">{{ $formatSaldo($saldoAkhirColumns['kredit']) }}</td>
                     </tr>
                 </tbody>
             </table>

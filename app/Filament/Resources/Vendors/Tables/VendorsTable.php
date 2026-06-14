@@ -2,14 +2,15 @@
 
 namespace App\Filament\Resources\Vendors\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Vendors\VendorResource;
+use App\Models\Vendor;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use App\Filament\Resources\Vendors\VendorResource;
+use Illuminate\Support\Facades\DB;
 
 
 class VendorsTable
@@ -42,12 +43,35 @@ class VendorsTable
                     ->label('Lihat'),   
                 EditAction::make()
                     ->label('Edit'),
-                DeleteAction::make()
+                Action::make('delete')
                     ->label('Hapus')
+                    ->icon('heroicon-m-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
                     ->modalHeading('Hapus Vendor')
                     ->modalDescription('Apakah Anda yakin ingin menghapus data vendor ini?')
                     ->modalSubmitActionLabel('Ya, hapus')
-                    ->modalCancelActionLabel('Batal'),
+                    ->modalCancelActionLabel('Batal')
+                    ->action(function (Vendor $record): void {
+                        if ($record->pembelians()->exists() || $record->penerimaanBarangs()->exists()) {
+                            Notification::make()
+                                ->title('Vendor tidak bisa dihapus')
+                                ->body('Vendor ini sudah dipakai di transaksi.')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
+                        DB::table('vendors')
+                            ->where('id', $record->getKey())
+                            ->delete();
+
+                        Notification::make()
+                            ->title('Vendor berhasil dihapus')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
             ]);

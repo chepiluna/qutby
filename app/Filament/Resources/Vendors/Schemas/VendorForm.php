@@ -79,10 +79,8 @@ class VendorForm
                         ->label('Periode Pembayaran')
                         ->options([
                             '1'  => '1 Bulan',
+                            '2'  => '2 Bulan',
                             '3'  => '3 Bulan',
-                            '6'  => '6 Bulan',
-                            '9'  => '9 Bulan',
-                            '12' => '12 Bulan',
                         ])
                         ->required(),
 

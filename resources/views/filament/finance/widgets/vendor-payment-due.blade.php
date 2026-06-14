@@ -62,8 +62,7 @@
             gap: 10px;
         }
 
-        .vendor-due-count,
-        .vendor-due-clear {
+        .vendor-due-count {
             align-items: center;
             border-radius: 9px;
             color: #ffffff;
@@ -79,31 +78,6 @@
         .vendor-due-count {
             background: #991b1b;
             border: 1px solid rgba(153, 27, 27, 0.85);
-        }
-
-        .vendor-due-clear {
-            background: transparent;
-            border: 1px solid #7f1d1d;
-            color: #0f172a;
-            cursor: pointer;
-            justify-content: center;
-            min-width: 116px;
-            transition: background .15s ease, border-color .15s ease;
-        }
-
-        .vendor-due-clear:hover {
-            background: rgba(127, 29, 29, 0.12);
-            border-color: #450a0a;
-        }
-
-        .vendor-due-clear:disabled {
-            cursor: not-allowed;
-            opacity: .70;
-        }
-
-        .vendor-due-clear svg {
-            height: 16px;
-            width: 16px;
         }
 
         .vendor-due-list {
@@ -226,10 +200,6 @@
                 width: 100%;
             }
 
-            .vendor-due-clear {
-                flex: 1;
-            }
-
             .vendor-due-row {
                 align-items: start;
                 gap: 14px;
@@ -243,7 +213,6 @@
         }
     </style>
 
-    @if ($rows->isNotEmpty())
     <div class="vendor-due-notifications">
         <div class="vendor-due-notifications__header">
             <div class="vendor-due-notifications__brand">
@@ -262,19 +231,6 @@
 
             <div class="vendor-due-notifications__actions">
                 <span class="vendor-due-count">{{ $newCount }} Baru</span>
-                <button
-                    type="button"
-                    class="vendor-due-clear"
-                    wire:click="dismissVisibleVendorPaymentDueNotifications"
-                    wire:loading.attr="disabled"
-                    wire:target="dismissVisibleVendorPaymentDueNotifications"
-                    @disabled($newCount === 0)
-                >
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                    Clear All
-                </button>
             </div>
         </div>
 
@@ -313,5 +269,4 @@
             @endforelse
         </div>
     </div>
-    @endif
 </x-filament-widgets::widget>

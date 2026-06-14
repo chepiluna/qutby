@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Sales\Widgets;
+namespace App\Filament\Operasional\Widgets;
 
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;

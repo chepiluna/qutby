@@ -12,11 +12,132 @@
 @endphp
 
 <x-filament::page>
+    <style>
+        .ledger-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+            overflow: hidden;
+        }
+
+        .ledger-card__header {
+            align-items: center;
+            background: #991b1b;
+            color: #ffffff;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            justify-content: space-between;
+            padding: 14px 18px;
+        }
+
+        .ledger-card__title {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+
+        .ledger-card__summary {
+            font-size: 12px;
+            line-height: 1.4;
+            opacity: .94;
+        }
+
+        .ledger-table-wrap {
+            overflow-x: auto;
+        }
+
+        .ledger-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 1120px;
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        .ledger-table th {
+            background: #fee2e2;
+            border-bottom: 1px solid #fecaca;
+            color: #991b1b;
+            font-size: 13px;
+            font-weight: 800;
+            height: 48px;
+            padding: 8px 14px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .ledger-table thead tr:last-child th {
+            height: 38px;
+        }
+
+        .ledger-table th + th,
+        .ledger-table td + td {
+            border-left: 1px solid #f3f4f6;
+        }
+
+        .ledger-table tbody td {
+            border-bottom: 1px solid #e5e7eb;
+            color: #111827;
+            font-size: 13px;
+            padding: 11px 14px;
+            vertical-align: middle;
+        }
+
+        .ledger-table tbody tr:hover td {
+            background: #fff7f7;
+        }
+
+        .ledger-date,
+        .ledger-ref,
+        .ledger-money {
+            white-space: nowrap;
+        }
+
+        .ledger-desc {
+            overflow-wrap: anywhere;
+        }
+
+        .ledger-money {
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+        }
+
+        .ledger-balance {
+            background: #fffafa;
+            font-weight: 800;
+        }
+
+        .ledger-balance-start {
+            border-left: 1px solid #fecaca !important;
+            border-left-color: #fecaca !important;
+        }
+
+        .ledger-row-muted td {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .ledger-row-total td {
+            background: #f3f4f6;
+            border-bottom: 0;
+            font-weight: 900;
+        }
+
+        .ledger-empty {
+            color: #6b7280 !important;
+            padding: 18px !important;
+            text-align: center;
+        }
+    </style>
+
     {{-- HEADER --}}
     <div class="mb-0 relative rounded-xl border border-gray-200 bg-white p-6">
         <div class="text-center">
-            <div class="text-lg font-bold tracking-wide">LAPORAN BUKU BESAR</div>
-            <div class="text-sm font-semibold">CV QUTBY COLLECTION</div>
+            <div class="text-xl font-bold">CV.QUTBY CREATIVINDO</div>
+            <div class="text-lg font-semibold tracking-wide">LAPORAN BUKU BESAR</div>
             <div class="text-sm text-gray-600">PERIODE: {{ $periodeText }}</div>
         </div>
     </div>
@@ -30,18 +151,38 @@
     @forelse ($this->ledgers as $ledger)
         @php
             $akun = $ledger['akun'];
-            $saldoLabel = (($ledger['normal_side'] ?? 'debit') === 'debit') ? 'Saldo (D)' : 'Saldo (K)';
             $saldoAkhir = collect($ledger['rows'])->last()['saldo'] ?? $ledger['saldo_awal'];
+            $saldoColumns = function (float|int $saldo) use ($ledger): array {
+                $normalSide = $ledger['normal_side'] ?? 'debit';
+                $amount = abs((float) $saldo);
+
+                if ((float) $saldo === 0.0) {
+                    return ['debit' => 0.0, 'kredit' => 0.0];
+                }
+
+                if ($normalSide === 'debit') {
+                    return $saldo > 0
+                        ? ['debit' => $amount, 'kredit' => 0.0]
+                        : ['debit' => 0.0, 'kredit' => $amount];
+                }
+
+                return $saldo > 0
+                    ? ['debit' => 0.0, 'kredit' => $amount]
+                    : ['debit' => $amount, 'kredit' => 0.0];
+            };
+            $formatSaldo = fn (float|int $value): string => $value ? 'Rp ' . number_format($value, 0, ',', '.') : '-';
+            $saldoAwalColumns = $saldoColumns($ledger['saldo_awal']);
+            $saldoAkhirColumns = $saldoColumns($saldoAkhir);
         @endphp
 
-        <div class="mb-6 rounded-xl border border-gray-200 overflow-hidden">
+        <div class="ledger-card mb-6">
 
             {{-- HEADER MAROON --}}
-            <div class="bg-red-800 text-white px-4 py-3 flex justify-between items-center">
-                <div class="font-semibold">
+            <div class="ledger-card__header">
+                <div class="ledger-card__title">
                     {{ $akun->kode_akun ?? '-' }} — {{ $akun->nama_akun ?? '-' }}
                 </div>
-                <div class="text-sm">
+                <div class="ledger-card__summary">
                     Saldo Awal: <strong>Rp {{ number_format($ledger['saldo_awal'], 0, ',', '.') }}</strong>
                     &nbsp; | &nbsp;
                     Saldo Akhir: <strong>Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</strong>
@@ -49,69 +190,94 @@
             </div>
 
             {{-- TABLE --}}
-            <div class="bg-white">
-                <table class="w-full text-sm border-collapse">
-                    <thead class="bg-red-100 text-red-800">
+            <div class="ledger-table-wrap bg-white">
+                <table class="ledger-table">
+                    <colgroup>
+                        <col style="width: 12%">
+                        <col style="width: 31%">
+                        <col style="width: 9%">
+                        <col style="width: 12%">
+                        <col style="width: 12%">
+                        <col style="width: 12%">
+                        <col style="width: 12%">
+                    </colgroup>
+                    <thead>
                         <tr>
-                            <th class="px-3 py-2 text-left">Tanggal</th>
-                            <th class="px-3 py-2 text-left">Keterangan</th>
-                            <th class="px-3 py-2 text-left">Ref</th>
-                            <th class="px-3 py-2 text-right">Debit</th>
-                            <th class="px-3 py-2 text-right">Kredit</th>
-                            <th class="px-3 py-2 text-right">{{ $saldoLabel }}</th>
+                            <th rowspan="2" class="text-left align-middle">Tanggal</th>
+                            <th rowspan="2" class="text-left align-middle">Keterangan</th>
+                            <th rowspan="2" class="text-left align-middle">Ref</th>
+                            <th rowspan="2" class="text-right align-middle">Debit</th>
+                            <th rowspan="2" class="text-right align-middle">Kredit</th>
+                            <th colspan="2" class="text-center ledger-balance-start">Saldo</th>
+                        </tr>
+                        <tr>
+                            <th class="text-right ledger-balance-start">Debit (Rp)</th>
+                            <th class="text-right">Kredit (Rp)</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {{-- SALDO AWAL --}}
-                        <tr class="border-b bg-gray-50">
+                        <tr class="ledger-row-muted">
                             <td></td>
-                            <td class="font-semibold px-3 py-2">Saldo Awal</td>
+                            <td class="ledger-desc">Saldo Awal</td>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td class="text-right px-3 py-2 font-bold">
-                                Rp {{ number_format($ledger['saldo_awal'], 0, ',', '.') }}
+                            <td class="ledger-money ledger-balance ledger-balance-start">
+                                {{ $formatSaldo($saldoAwalColumns['debit']) }}
+                            </td>
+                            <td class="ledger-money ledger-balance">
+                                {{ $formatSaldo($saldoAwalColumns['kredit']) }}
                             </td>
                         </tr>
 
                         {{-- TRANSAKSI --}}
                         @forelse ($ledger['rows'] as $row)
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-3 py-2">
+                            @php
+                                $rowSaldoColumns = $saldoColumns($row['saldo']);
+                            @endphp
+                            <tr>
+                                <td class="ledger-date">
                                     {{ \Carbon\Carbon::parse($row['tanggal'])->format('d/m/Y') }}
                                 </td>
-                                <td class="px-3 py-2">{{ $row['keterangan'] }}</td>
-                                <td class="px-3 py-2">{{ $row['ref'] }}</td>
+                                <td class="ledger-desc">{{ $row['keterangan'] }}</td>
+                                <td class="ledger-ref">{{ $row['ref'] }}</td>
 
                                 {{-- DEBIT (HITAM) --}}
-                                <td class="px-3 py-2 text-right text-black">
+                                <td class="ledger-money">
                                     {{ $row['debit'] ? 'Rp ' . number_format($row['debit'], 0, ',', '.') : '-' }}
                                 </td>
 
                                 {{-- KREDIT (HITAM) --}}
-                                <td class="px-3 py-2 text-right text-black">
+                                <td class="ledger-money">
                                     {{ $row['kredit'] ? 'Rp ' . number_format($row['kredit'], 0, ',', '.') : '-' }}
                                 </td>
 
                                 {{-- SALDO (BOLD HITAM) --}}
-                                <td class="px-3 py-2 text-right font-bold text-black">
-                                    Rp {{ number_format($row['saldo'], 0, ',', '.') }}
+                                <td class="ledger-money ledger-balance ledger-balance-start">
+                                    {{ $formatSaldo($rowSaldoColumns['debit']) }}
+                                </td>
+                                <td class="ledger-money ledger-balance">
+                                    {{ $formatSaldo($rowSaldoColumns['kredit']) }}
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-gray-500">
+                                <td colspan="7" class="ledger-empty">
                                     Tidak ada transaksi bulan ini
                                 </td>
                             </tr>
                         @endforelse
 
                         {{-- SALDO AKHIR --}}
-                        <tr class="bg-gray-100 font-bold">
-                            <td colspan="5" class="text-right px-3 py-2">Saldo Akhir</td>
-                            <td class="text-right px-3 py-2 font-bold">
-                                Rp {{ number_format($saldoAkhir, 0, ',', '.') }}
+                        <tr class="ledger-row-total">
+                            <td colspan="5" class="ledger-money">Saldo Akhir</td>
+                            <td class="ledger-money ledger-balance ledger-balance-start">
+                                {{ $formatSaldo($saldoAkhirColumns['debit']) }}
+                            </td>
+                            <td class="ledger-money ledger-balance">
+                                {{ $formatSaldo($saldoAkhirColumns['kredit']) }}
                             </td>
                         </tr>
 

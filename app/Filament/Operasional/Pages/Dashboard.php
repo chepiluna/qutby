@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Sales\Pages;
+namespace App\Filament\Operasional\Pages;
 
 use App\Models\Barang;
 use App\Models\Pembelian;
@@ -10,6 +10,7 @@ use App\Models\PenjualanDetail;
 use Carbon\Carbon;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class Dashboard extends Page
@@ -24,32 +25,34 @@ class Dashboard extends Page
 
     protected static ?string $slug = '/';
 
-    protected string $view = 'filament.sales.pages.dashboard';
+    protected string $view = 'filament.operasional.pages.dashboard';
 
     public function getDashboardData(): array
     {
-        $now = now();
-        $start = $now->copy()->startOfMonth();
-        $end = $now->copy()->endOfMonth();
+        return Cache::remember('operasional-dashboard-data', now()->addMinutes(5), function (): array {
+            $now = now();
+            $start = $now->copy()->startOfMonth();
+            $end = $now->copy()->endOfMonth();
 
-        $sales = $this->getSalesMetrics($start, $end);
-        $purchases = $this->getPurchaseMetrics($start, $end);
-        $grossProfit = $sales['total'] - $purchases['total'];
+            $sales = $this->getSalesMetrics($start, $end);
+            $purchases = $this->getPurchaseMetrics($start, $end);
+            $grossProfit = $sales['total'] - $purchases['total'];
 
-        return [
-            'period' => $this->formatIndonesianMonth($now),
-            'sales' => $sales,
-            'purchases' => $purchases,
-            'grossProfit' => [
-                'amount' => $grossProfit,
-                'margin' => $sales['total'] > 0 ? ($grossProfit / $sales['total']) * 100 : 0,
-            ],
-            'topSold' => $this->getTopSold($start, $end),
-            'topBought' => $this->getTopBought($start, $end),
-            'lowStock' => $this->getLowStock(),
-            'dueDebts' => $this->getDueDebts($end),
-            'trend' => $this->getTrendData(),
-        ];
+            return [
+                'period' => $this->formatIndonesianMonth($now),
+                'sales' => $sales,
+                'purchases' => $purchases,
+                'grossProfit' => [
+                    'amount' => $grossProfit,
+                    'margin' => $sales['total'] > 0 ? ($grossProfit / $sales['total']) * 100 : 0,
+                ],
+                'topSold' => $this->getTopSold($start, $end),
+                'topBought' => $this->getTopBought($start, $end),
+                'lowStock' => $this->getLowStock(),
+                'dueDebts' => $this->getDueDebts($end),
+                'trend' => $this->getTrendData(),
+            ];
+        });
     }
 
     protected function getSalesMetrics(Carbon $start, Carbon $end): array
@@ -82,12 +85,15 @@ class Dashboard extends Page
         $total = (float) (clone $base)->sum('total_akhir');
         $cash = (float) (clone $base)->where('syarat_pembayaran', 'tunai')->sum('total_akhir');
         $credit = (float) (clone $base)->where('syarat_pembayaran', 'kredit')->sum('total_akhir');
-        $debt = (float) DB::table('po_termins')->where('status', '!=', 'lunas')->sum('nominal');
-        $receivedQty = (int) DB::table('grn_details')
-            ->join('grns', 'grns.id', '=', 'grn_details.grn_id')
-            ->where('grns.status', 'dikonfirmasi')
-            ->whereBetween('grns.tanggal_terima', [$start, $end])
-            ->sum('grn_details.qty_diterima');
+        $debt = (float) (clone $base)
+            ->where('syarat_pembayaran', 'kredit')
+            ->where(fn ($query) => $query->whereNull('status')->orWhere('status', '!=', 'lunas'))
+            ->sum('total_akhir');
+        $receivedQty = (int) DB::table('penerimaan_barang_details')
+            ->join('penerimaan_barangs', 'penerimaan_barangs.id', '=', 'penerimaan_barang_details.grn_id')
+            ->where('penerimaan_barangs.status', 'dikonfirmasi')
+            ->whereBetween('penerimaan_barangs.tanggal_terima', [$start, $end])
+            ->sum('penerimaan_barang_details.qty_diterima');
 
         return [
             'total' => $total,
@@ -157,20 +163,38 @@ class Dashboard extends Page
 
     protected function getDueDebts(Carbon $end): Collection
     {
-        return DB::table('po_termins')
-            ->join('pembelians', 'pembelians.id', '=', 'po_termins.pembelian_id')
+        return DB::table('pembelians')
             ->leftJoin('vendors', 'vendors.id', '=', 'pembelians.vendor_id')
-            ->where('po_termins.status', '!=', 'lunas')
-            ->whereDate('po_termins.due_date', '<=', $end)
+            ->where('pembelians.syarat_pembayaran', 'kredit')
+            ->where(fn ($query) => $query->whereNull('pembelians.status')->orWhere('pembelians.status', '!=', 'lunas'))
             ->select([
+                'pembelians.tanggal',
+                'pembelians.total_akhir',
+                'vendors.id as vendor_id',
+                'vendors.periode_pembayaran',
                 DB::raw('COALESCE(vendors.nama_vendor, "-") as supplier'),
-                DB::raw('SUM(po_termins.nominal) as amount'),
-                DB::raw('MIN(po_termins.due_date) as due_date'),
             ])
-            ->groupBy('vendors.id', 'vendors.nama_vendor')
-            ->orderBy('due_date')
-            ->limit(5)
-            ->get();
+            ->get()
+            ->map(function ($row): object {
+                $dueDate = Carbon::parse($row->tanggal)
+                    ->addMonthsNoOverflow((int) ($row->periode_pembayaran ?: 1));
+
+                return (object) [
+                    'supplier' => $row->supplier,
+                    'amount' => (float) ($row->total_akhir ?? 0),
+                    'due_date' => $dueDate->toDateString(),
+                ];
+            })
+            ->filter(fn (object $row): bool => Carbon::parse($row->due_date)->lte($end))
+            ->groupBy('supplier')
+            ->map(fn (Collection $rows, string $supplier): object => (object) [
+                'supplier' => $supplier,
+                'amount' => $rows->sum('amount'),
+                'due_date' => $rows->min('due_date'),
+            ])
+            ->sortBy('due_date')
+            ->take(5)
+            ->values();
     }
 
     protected function getTrendData(): array

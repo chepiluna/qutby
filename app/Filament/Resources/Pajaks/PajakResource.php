@@ -64,9 +64,9 @@ class PajakResource extends Resource
         return false;
     }
 
-    // ✅ hanya tampil di panel sales
+    // hanya tampil di panel operasional
     public static function shouldRegisterNavigation(): bool
     {
-        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'sales'], true);
+        return in_array(Filament::getCurrentPanel()?->getId(), ['admin', 'operasional'], true);
     }
 }
