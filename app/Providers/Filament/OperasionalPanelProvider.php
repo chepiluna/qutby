@@ -39,7 +39,6 @@ class OperasionalPanelProvider extends PanelProvider
                 'Laporan',
                 'Pengaturan', 
             ])
-            
             ->brandName('QUTRIX')
             ->brandLogo(asset('images/logoqutby.png'))
             ->brandLogoHeight('2.6rem')
@@ -47,6 +46,7 @@ class OperasionalPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ]) // ← TUTUP colors di sini
+
             ->renderHook(
                 PanelsRenderHook::TOPBAR_LOGO_BEFORE,
                 fn () => view('filament.operasional.partials.qutrix-brand'),
