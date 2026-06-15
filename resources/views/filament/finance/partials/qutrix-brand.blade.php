@@ -1,7 +1,7 @@
-<a href="{{ url('/finance') }}">
+<a href="{{ url('/finance') }}" class="qutrix-brand">
     <img
         src="{{ asset('images/logoqutby.png') }}"
         alt="QUTRIX"
-        style="height:40px; width:auto;"
+        class="qutrix-brand__image"
     >
 </a>

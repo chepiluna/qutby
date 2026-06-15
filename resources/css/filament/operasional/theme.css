@@ -54,10 +54,6 @@
   width: auto;
 }
 
-.fi-topbar-start > a:not(.qutrix-brand) > .fi-logo {
-  display: none !important;
-}
-
 .fi-topbar .fi-logo,
 .fi-topbar .fi-logo *,
 .fi-topbar-brand-text {

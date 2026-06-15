@@ -35,7 +35,7 @@ class PenjualanForm
                             ->required()
                             ->default(now())
                             ->minDate(now()->startOfMonth())
-                            ->maxDate(now()),
+                            ->maxDate(today()),
 
                         TextInput::make('no_faktur')
                             ->label('No. Faktur')
@@ -108,7 +108,11 @@ class PenjualanForm
                                 titleAttribute: 'nama_akun',
                                 modifyQueryUsing: fn(Builder $query) =>
                                 $query->where('header_akun', 1)
-                            )
+                                    ->where(function($query) {
+                                        $query->where('nama_akun', 'like', '%kas%')
+                                                ->orWhere('nama_akun', 'like', '%bank%');
+                                    })
+                        )
                             ->preload()
                             ->searchable()
                             ->visible(
@@ -214,21 +218,14 @@ class PenjualanForm
 
                                         $hpp = $hpp ?: 0;
 
-                                        $hargaJual = $hpp * 1.55;
+                                        $hargaJual = ceil(($hpp * 1.55) / 500) * 500;
 
                                         $qty = (int) ($get('qty') ?: 1);
 
                                         $subtotal = $qty * $hargaJual;
 
-                                        $set(
-                                            'harga_satuan',
-                                            round($hargaJual, 2)
-                                        );
-
-                                        $set(
-                                            'subtotal',
-                                            round($subtotal, 2)
-                                        );
+                                        $set('harga_satuan', $hargaJual);
+                                        $set('subtotal', round($subtotal));
 
                                         \App\Filament\Resources\Penjualans\PenjualanResource::updateTotals($get, $set);
                                     }),
@@ -255,7 +252,7 @@ class PenjualanForm
 
                                         $set(
                                             'subtotal',
-                                            round($subtotal, 2)
+                                            round($subtotal)
                                         );
 
                                         \App\Filament\Resources\Penjualans\PenjualanResource::updateTotals($get, $set);
@@ -282,7 +279,7 @@ class PenjualanForm
 
                                         $set(
                                             'subtotal',
-                                            round($subtotal, 2)
+                                            round($subtotal)
                                         );
 
                                         \App\Filament\Resources\Penjualans\PenjualanResource::updateTotals($get, $set);

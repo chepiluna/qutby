@@ -47,6 +47,11 @@ class OperasionalPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ]) // ← TUTUP colors di sini
 
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_LOGO_BEFORE,
+                fn () => view('filament.operasional.partials.qutrix-brand'),
+            )
+
             // Ambil resource/page/widget default (admin)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
