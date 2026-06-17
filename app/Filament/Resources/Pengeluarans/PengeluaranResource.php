@@ -58,23 +58,24 @@ class PengeluaranResource extends Resource
 
                     Forms\Components\DatePicker::make('tanggal_pengeluaran')
                         ->label('Tanggal')
-                        ->default(now()->toDateString())
+                        ->minDate(now()->startOfMonth())
+                        ->maxDate(today())
                         ->required(),
 
                     // ✅ AKUN BEBAN (HEADER 5 SAJA)
                     Forms\Components\Select::make('daftar_akun_id')
-                        ->label('Akun Beban')
-                        ->options(
-                            DaftarAkun::where('header_akun', '5')
-                                ->whereNull('parent_id') // ⬅️ cuma header "Beban"
-                                ->get()
-                                ->mapWithKeys(fn ($akun) => [
-                                    $akun->id => $akun->kode_akun . ' - ' . $akun->nama_akun
-                                ])
-                        )
-                        ->searchable()
-                        ->preload()
-                        ->required(),
+                    ->label('Akun Beban')
+                    ->options(
+                        DaftarAkun::where('header_akun', '5')
+                            ->whereNotNull('parent_id') // ✅ ambil child/detail, bukan header
+                            ->get()
+                            ->mapWithKeys(fn ($akun) => [
+                                $akun->id => $akun->kode_akun . ' - ' . $akun->nama_akun
+                            ])
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->required(),
 
                     // ✅ DIBAYAR DARI (HEADER 1)
                     Forms\Components\Select::make('kas_bank_id')
