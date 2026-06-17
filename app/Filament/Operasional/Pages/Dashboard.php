@@ -3,12 +3,11 @@
 namespace App\Filament\Operasional\Pages;
 
 use App\Models\Barang;
-use App\Models\Pembelian;
-use App\Models\PembelianDetail;
 use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use Carbon\Carbon;
 use Filament\Pages\Page;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -80,20 +79,25 @@ class Dashboard extends Page
 
     protected function getPurchaseMetrics(Carbon $start, Carbon $end): array
     {
-        $base = Pembelian::query()->whereBetween('tanggal', [$start, $end]);
+        $base = $this->getReceivedPurchaseBaseQuery($start, $end);
+        $ppnMultiplier = $this->getPpnMultiplier();
 
-        $total = (float) (clone $base)->sum('total_akhir');
-        $cash = (float) (clone $base)->where('syarat_pembayaran', 'tunai')->sum('total_akhir');
-        $credit = (float) (clone $base)->where('syarat_pembayaran', 'kredit')->sum('total_akhir');
-        $debt = (float) (clone $base)
-            ->where('syarat_pembayaran', 'kredit')
-            ->where(fn ($query) => $query->whereNull('status')->orWhere('status', '!=', 'lunas'))
-            ->sum('total_akhir');
-        $receivedQty = (int) DB::table('penerimaan_barang_details')
-            ->join('penerimaan_barangs', 'penerimaan_barangs.id', '=', 'penerimaan_barang_details.grn_id')
-            ->where('penerimaan_barangs.status', 'dikonfirmasi')
-            ->whereBetween('penerimaan_barangs.tanggal_terima', [$start, $end])
-            ->sum('penerimaan_barang_details.qty_diterima');
+        $total = $this->sumReceivedPurchaseAmount(clone $base, $ppnMultiplier);
+        $cash = $this->sumReceivedPurchaseAmount(
+            (clone $base)->where('pembelians.syarat_pembayaran', 'tunai'),
+            $ppnMultiplier,
+        );
+        $credit = $this->sumReceivedPurchaseAmount(
+            (clone $base)->where('pembelians.syarat_pembayaran', 'kredit'),
+            $ppnMultiplier,
+        );
+        $debt = $this->sumReceivedPurchaseAmount(
+            (clone $base)
+                ->where('pembelians.syarat_pembayaran', 'kredit')
+                ->where(fn ($query) => $query->whereNull('pembelians.status')->orWhere('pembelians.status', '!=', 'lunas')),
+            $ppnMultiplier,
+        );
+        $receivedQty = (int) (clone $base)->sum('penerimaan_barang_details.qty_diterima');
 
         return [
             'total' => $total,
@@ -125,14 +129,12 @@ class Dashboard extends Page
 
     protected function getTopBought(Carbon $start, Carbon $end): Collection
     {
-        return PembelianDetail::query()
-            ->join('pembelians', 'pembelians.id', '=', 'pembelian_details.pembelian_id')
+        return $this->getReceivedPurchaseBaseQuery($start, $end)
             ->leftJoin('barang', 'barang.id', '=', 'pembelian_details.barang_id')
-            ->whereBetween('pembelians.tanggal', [$start, $end])
             ->select([
                 DB::raw('COALESCE(barang.nama_barang, "-") as name'),
-                DB::raw('COALESCE(SUM(pembelian_details.qty), 0) as qty'),
-                DB::raw('COALESCE(SUM(pembelian_details.subtotal), 0) as amount'),
+                DB::raw('COALESCE(SUM(penerimaan_barang_details.qty_diterima), 0) as qty'),
+                DB::raw('COALESCE(SUM(' . $this->receivedPurchaseDppSql() . '), 0) as amount'),
             ])
             ->groupBy('barang.id', 'barang.nama_barang')
             ->orderByDesc('qty')
@@ -208,9 +210,10 @@ class Dashboard extends Page
             ->groupBy('date')
             ->pluck('total', 'date');
 
-        $purchases = Pembelian::query()
-            ->whereBetween('tanggal', [$start, $end])
-            ->selectRaw('DATE(tanggal) as date, SUM(total_akhir) as total')
+        $purchases = $this->getReceivedPurchaseBaseQuery($start, $end)
+            ->selectRaw('DATE(penerimaan_barangs.tanggal_terima) as date, COALESCE(SUM(' . $this->receivedPurchaseAmountSql() . '), 0) as total', [
+                $this->getPpnMultiplier(),
+            ])
             ->groupBy('date')
             ->pluck('total', 'date');
 
@@ -237,6 +240,51 @@ class Dashboard extends Page
     protected function percentage(float $part, float $total): int
     {
         return $total > 0 ? (int) round(($part / $total) * 100) : 0;
+    }
+
+    protected function getReceivedPurchaseBaseQuery(Carbon $start, Carbon $end): QueryBuilder
+    {
+        return DB::table('penerimaan_barang_details')
+            ->join('penerimaan_barangs', 'penerimaan_barangs.id', '=', 'penerimaan_barang_details.grn_id')
+            ->join('pembelian_details', 'pembelian_details.id', '=', 'penerimaan_barang_details.pembelian_detail_id')
+            ->join('pembelians', 'pembelians.id', '=', 'pembelian_details.pembelian_id')
+            ->where('penerimaan_barangs.status', 'dikonfirmasi')
+            ->whereBetween('penerimaan_barangs.tanggal_terima', [$start, $end]);
+    }
+
+    protected function sumReceivedPurchaseAmount(QueryBuilder $query, float $ppnMultiplier): float
+    {
+        return (float) $query
+            ->selectRaw('COALESCE(SUM(' . $this->receivedPurchaseAmountSql() . '), 0) as amount', [$ppnMultiplier])
+            ->value('amount');
+    }
+
+    protected function receivedPurchaseAmountSql(): string
+    {
+        return $this->receivedPurchaseDppSql() . ' * CASE WHEN pembelians.ppn = 1 THEN ? ELSE 1 END';
+    }
+
+    protected function receivedPurchaseDppSql(): string
+    {
+        return 'penerimaan_barang_details.qty_diterima'
+            . ' * pembelian_details.harga'
+            . ' * (1 - (COALESCE(pembelian_details.diskon_persen, 0) / 100))'
+            . ' * (1 - (COALESCE(pembelians.diskon, 0) / 100))';
+    }
+
+    protected function getPpnMultiplier(): float
+    {
+        static $multiplier = null;
+
+        if ($multiplier !== null) {
+            return $multiplier;
+        }
+
+        $percent = (float) (DB::table('pajak')
+            ->where('kode', 'PPN')
+            ->value('persen') ?? 0);
+
+        return $multiplier = 1 + ($percent / 100);
     }
 
     protected function formatIndonesianMonth(Carbon $date): string
